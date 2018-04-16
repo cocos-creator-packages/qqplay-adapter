@@ -1,0 +1,1 @@
+# qqplay-adapter
