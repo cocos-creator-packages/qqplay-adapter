@@ -7,9 +7,11 @@ function HTMLImageElement () {
     this._src = '';
     this.width = 0;
     this.height = 0;
+    this.onload = null;
+    this.onerror = null;
 
     this.addEventListener('load', function () {
-        this.onLoad && this.onLoad();
+        this.onload && this.onload();
         if(!this.bkImage) {
             return;
         }
@@ -18,7 +20,7 @@ function HTMLImageElement () {
     }.bind(this));
 
     this.addEventListener('error', function () {
-        this.onError && this.onError();
+        this.onerror && this.onerror();
     }.bind(this));
 }
 
