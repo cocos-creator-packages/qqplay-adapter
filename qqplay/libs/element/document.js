@@ -45,6 +45,8 @@ function HTMLDocumentElement () {
         tag = tag.toLowerCase();
         if (tag === 'canvas') {
             var canvas = new BK.Canvas(1, 1);
+            canvas.strokewidth = 0;
+            canvas.strokeColor ={r:0,g:0,b:0,a:0};
             canvas.useH5Mode();
             return canvas;
         }

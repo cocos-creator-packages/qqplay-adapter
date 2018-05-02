@@ -113,15 +113,18 @@ XMLHttpRequest.DONE = 4;
                 if (_this.method.toLowerCase() === 'post') {
                     httpReq.setHttpMethod('post');
                     httpReq.setHttpPostData(data);
+                    httpReq.setBodyCompatible(false);
                 }
                 else {
                     httpReq.setHttpMethod('get');
                 }
-                if (this.header["Referer"]) {
-                    httpReq.setHttpReferer(this.header["Referer"]);
-                }
-                if (this.header["Cookie"]) {
-                    httpReq.setHttpCookie(this.header["Cookie"]);
+                for(var key in this.header){
+                    if(key === "Referer"){
+                        httpReq.setHttpReferer && httpReq.setHttpReferer(this.header["Referer"]);
+                    }else if(key === "Cookie"){
+                        httpReq.setHttpCookie && httpReq.setHttpCookie(this.header["Cookie"]);
+                    }
+                    httpReq.setHttpHeader(key, this.header[key]);
                 }
 
                 httpReq.requestAsync(function (buffer, status) {

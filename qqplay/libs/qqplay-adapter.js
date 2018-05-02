@@ -6,7 +6,7 @@ window.addEventListener = function () {};
 window.removeEventListener = function () {};
 
 var navigator = window.navigator = {
-    userAgent: 'qqplay mobile ios',
+    userAgent: 'qqplay ' + GameStatusInfo.platform + ' QQ/' + GameStatusInfo.QQVer,
     appVersion: ''
 };
 
@@ -37,19 +37,19 @@ var location = window.location = {
 };
 var console = window.console = {
     log: function (msg) {
-        BK.Script.log(0, 0, msg);
+        BK.Script.log(1, 0, msg);
     },
     warn: function (msg) {
-        BK.Script.log(0, 0, msg);
+        BK.Script.log(1, 0, msg);
     },
     error: function (msg) {
-        BK.Script.log(0, 0, msg);
+        BK.Script.log(1, 0, msg);
     },
     info: function(msg) {
-        BK.Script.log(0, 0, msg);
+        BK.Script.log(1, 0, msg);
     },
     debug: function(msg) {
-        BK.Script.log(0, 0, msg);
+        BK.Script.log(1, 0, msg);
     },
 };
 
@@ -140,6 +140,8 @@ Object.defineProperty(prototype, "width", {
         size.width = val;
         this.contentSize = size;
         this.font = "";
+        this.strokeColor = {r:0,g:0,b:0,a:0};
+        this.strokewidth = 0;
     },
     enumerable: true,
     configurable: true
@@ -153,6 +155,8 @@ Object.defineProperty(prototype, "height", {
         size.height = val;
         this.contentSize = size;
         this.font = "";
+        this.strokeColor = {r:0,g:0,b:0,a:0};
+        this.strokewidth = 0;
     },
     enumerable: true,
     configurable: true
@@ -168,7 +172,7 @@ Object.defineProperty(prototype, "font", {
         if (val) {
             var matchRet = val.match(/(\d*)px/);
             var size = (matchRet && !isNaN(matchRet[1])) ? parseInt(matchRet[1]) : 20;
-            console.log("size" + size)
+            //console.log("size" + size)
             this.setTextSize(size);
             var isBold = BOLD_REGEX.test(val);
             this.setTextBold(isBold);
@@ -353,7 +357,7 @@ WebSocket.CLOSED = 3;
 Object.defineProperty(WebSocket.prototype, "readyState", {
     get: function () {
         var readyState = this.getReadyState();
-        console.log("defineProperty readyState" + readyState)
+        //console.log("defineProperty readyState" + readyState)
         if (readyState === 4 /* ESTABLISHED */)
             return WebSocket.OPEN;
         if (readyState === 2 /* HANDSHAKE_REQ */ || readyState === 3 /* HANDSHAKE_RESP */)

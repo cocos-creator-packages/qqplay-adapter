@@ -1,11 +1,11 @@
 
-var AudioCachePath = 'GameSandBox://AudioCache7dwe';
+var AudioCachePath = 'GameSandBox://AudioCache7dwe/';
 
 function HTMLAudioElement () {
     _HTMLBaseElemenet.call(this);
 
     this._src = '';
-    this.__audioPath = '';
+    this._audioPath = '';
     this._paused = true;
     this._loaded = false;
     this._currentTime = 0;
@@ -28,11 +28,15 @@ function HTMLAudioElement () {
             return;
         }
         var loop = this._loop ? -1 : 1;
-        if(!this._handle){
-            this._handle = new BK.Audio(this._loop ? 0 : 1, this.__audioPath, loop);
+        if (loop === -1) {
+            if(!this._handle){
+                this._handle = new BK.Audio(this._loop ? 0 : 1, this._audioPath, loop);
+            }
+            this._handle.stopMusic();
+            this._handle.startMusic();
+        } else {
+            BK.Audio.playMusic(this._loop ? 0 : 1, this._audioPath, loop);
         }
-        this._handle.stopMusic();
-        this._handle.startMusic();
     };
 
     prop.pause = function () {
@@ -46,7 +50,9 @@ function HTMLAudioElement () {
     prop.resume = function () {
         this._paused = false;
         if (!this._handle) {
-            this.play();
+            if (this._loop) {
+                this.play();
+            }
             return;
         }
         this._handle.resumeMusic();
@@ -85,7 +91,7 @@ function HTMLAudioElement () {
             // api 限制，无法实现在播音频的循环
             return this._loop;
         },
-
+    
         set:function (bool) {
             this._loop = bool;
         },
@@ -133,25 +139,25 @@ function HTMLAudioElement () {
             setTimeout(function () {
                 this.emit('canplaythrough');
             }.bind(this), 5);
-
+            
             // loacl asset
             if (!/^http/.test(val)) {
-                this.__audioPath = val;
+                this._audioPath = val;
                 setTimeout(function () {
                     this.emit('load');
                 }.bind(this), 10);
                 return;
             }
-
+    
             var localFileName = this._src.replace(/\//g, '-_-');
-            this.__audioPath = AudioCachePath + localFileName;
-            if (BK.FileUtil.isFileExist(this.__audioPath)) {
+            this._audioPath = AudioCachePath + localFileName;
+            if (BK.FileUtil.isFileExist(this._audioPath)) {
                 setTimeout(function () {
                     this.emit('load');
                 }.bind(this), 10);
                 return;
             }
-
+    
             // GameSandBox://
             var httpReq = new BK.HttpUtil(val);
             httpReq.setHttpMethod('get');
