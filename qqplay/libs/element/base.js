@@ -43,7 +43,7 @@ function _HTMLEventElement () {
 
 function _ClassList () {
     Array.call(this);
-};
+}
 
 (function(prop) {
 

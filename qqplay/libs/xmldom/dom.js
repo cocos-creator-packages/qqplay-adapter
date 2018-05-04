@@ -20,7 +20,10 @@ function _extends(Class,Super){
 		function t(){};
 		t.prototype = Super.prototype;
 		t = new t();
-		copy(pt,t);
+		// copy(pt,t);
+        for(var p in pt){
+            t[p] = pt[p];
+        }
 		Class.prototype = pt = t;
 	}
 	if(pt.constructor != Class){
@@ -124,7 +127,10 @@ function _updateLiveList(list){
 		var ls = list._refresh(list._node);
 		//console.log(ls.length)
 		__set__(list,'length',ls.length);
-		copy(ls,list);
+		//copy(ls,list);
+        for(var p in ls){
+            list[p] = ls[p];
+        }
 		list._inc = inc;
 	}
 }
@@ -251,7 +257,7 @@ NamedNodeMap.prototype = {
 /**
  * @see http://www.w3.org/TR/REC-DOM-Level-1/level-one-core.html#ID-102161490
  */
-var DOMImplementation = window.DOMImplementation = function (/* Object */ features) {
+function DOMImplementation(/* Object */ features) {
 	this._features = {};
 	if (features) {
 		for (var feature in features) {
@@ -905,8 +911,7 @@ function ProcessingInstruction() {
 }
 ProcessingInstruction.prototype.nodeType = PROCESSING_INSTRUCTION_NODE;
 _extends(ProcessingInstruction,Node);
-
-var XMLSerializer = window.XMLSerializer = function () {}
+function XMLSerializer(){}
 XMLSerializer.prototype.serializeToString = function(node,isHtml,nodeFilter){
 	return nodeSerializeToString.call(node,isHtml,nodeFilter);
 }
@@ -1235,3 +1240,7 @@ try{
 }catch(e){//ie8
 }
 
+//if(typeof require == 'function'){
+	exports.DOMImplementation = DOMImplementation;
+	exports.XMLSerializer = XMLSerializer;
+//}
