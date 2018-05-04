@@ -26,18 +26,16 @@ function HTMLMainCanvasElement () {
             return isSupportTA;
         }
 
-        if (!isSupportTA) {
-            if (GameStatusInfo.platform === 'android') {
-                isSupportTA = true;
-            }
-            var info = BK.Director.queryDeviceInfo();
-            var vers = info.version.split('.');
-            if (info.platform === 'ios' && Number(vers[0]) >= 10 || info.platform === 'android') {
-                isSupportTA = true;
-            } else {
-                BK.Script.log(1, 0, 'Current Device dont supoort TypedArray.[info = ' + JSON.stringify(info) + ']');
-                isSupportTA = false;
-            }
+        if (GameStatusInfo.platform === 'android') {
+            isSupportTA = true;
+        }
+        var info = BK.Director.queryDeviceInfo();
+        var vers = info.version.split('.');
+        if ((info.platform === 'ios' && Number(vers[0]) >= 10) || info.platform === 'android') {
+            isSupportTA = true;
+        } else {
+            BK.Script.log(1, 0, 'Current Device dont supoort TypedArray.[info = ' + JSON.stringify(info) + ']');
+            isSupportTA = false;
         }
         return isSupportTA;
     }
