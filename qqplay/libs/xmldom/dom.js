@@ -257,7 +257,7 @@ NamedNodeMap.prototype = {
 /**
  * @see http://www.w3.org/TR/REC-DOM-Level-1/level-one-core.html#ID-102161490
  */
-function DOMImplementation(/* Object */ features) {
+var DOMImplementation = function DOMImplementation(/* Object */ features) {
 	this._features = {};
 	if (features) {
 		for (var feature in features) {
@@ -911,7 +911,7 @@ function ProcessingInstruction() {
 }
 ProcessingInstruction.prototype.nodeType = PROCESSING_INSTRUCTION_NODE;
 _extends(ProcessingInstruction,Node);
-function XMLSerializer(){}
+var XMLSerializer = function XMLSerializer(){}
 XMLSerializer.prototype.serializeToString = function(node,isHtml,nodeFilter){
 	return nodeSerializeToString.call(node,isHtml,nodeFilter);
 }
@@ -1239,8 +1239,3 @@ try{
 	}
 }catch(e){//ie8
 }
-
-//if(typeof require == 'function'){
-	exports.DOMImplementation = DOMImplementation;
-	exports.XMLSerializer = XMLSerializer;
-//}
