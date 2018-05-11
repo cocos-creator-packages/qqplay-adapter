@@ -62,12 +62,12 @@ function HTMLImageElement () {
                             this.emit('error', ret);
                         }
                         else {
-                            this._generateBKImage(filePath);
+                            this._src = filePath;
                         }
                     }.bind(this));
                 }
                 else {
-                    this._generateBKImage(filePath);
+                    this._src = filePath;
                 }
             }
             else if (/^data:image/.test(val)) {
@@ -76,7 +76,7 @@ function HTMLImageElement () {
                 filePath = ImageCachePath + this._localFileName;
                 isFileValid = qpAdapter.isFileAvailable(filePath);
                 if (isFileValid) {
-                    this._generateBKImage(filePath);
+                    this._src = filePath;
                 }
                 else {
                     var base64str = val.replace(/data:image.+;base64,/, "");
@@ -86,11 +86,8 @@ function HTMLImageElement () {
                         buffer.writeUint8Buffer(bytes[i]);
                     }
                     qpAdapter.saveFile(filePath, buffer);
-                    this._generateBKImage(filePath);
+                    this._src = filePath;
                 }
-            }
-            else { //本地资源
-                this._generateBKImage(val);
             }
         },
     });

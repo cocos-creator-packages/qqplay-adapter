@@ -11,13 +11,30 @@ function HTMLMainCanvasElement () {
         return [];
     };
     var _gl_texImage2D = gl.texImage2D;
-    gl.texImage2D = function(){
-        if(arguments.length === 6 && arguments[5] instanceof Image){
-            arguments[5] = arguments[5].bkImage;
+    gl.texImage2D = function() {
+        // generate and dispose BKImage
+        if (6 === arguments.length && arguments[5] instanceof Image) {
+            // create temp arguments
+            var tempArguments = [];
+            for (var i = 0; i < arguments.length; ++i) {
+                tempArguments.push(arguments[i]);
+            }
+            // generate bkimage
+            var image = tempArguments[5];
+            var bkImage = image.bkImage;
+            if (!bkImage) {
+                bkImage._generateBKImage(image.src);
+            }
+            tempArguments[5] = bkImage;
+            // apply textImage2D
+            _gl_texImage2D.apply(this, tempArguments);
+            // dispose bkImage
+            bkImage.dispose();
         }
-        _gl_texImage2D.apply(this, arguments);
+        else {
+            _gl_texImage2D.apply(this, arguments);
+        }
     };
-
 
     var isSupportTA = undefined;
     function __bkIsSupportTypedArray() {
