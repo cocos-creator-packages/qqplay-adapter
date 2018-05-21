@@ -33,7 +33,6 @@ function HTMLImageElement () {
         if (bkImage) {
             this.width = bkImage.width;
             this.height = bkImage.height;
-            bkImage.dispose();
         }
         this.emit('load');
     };
@@ -43,6 +42,11 @@ function HTMLImageElement () {
             console.warn('The image src value is empty. please check it');
             return;
         }
+
+        if (this.bkImage) {
+            return;
+        }
+
         this.bkImage = BK.Image.loadImage(this._src);
         if (this.bkImage) {
             this.width = this.bkImage.width;
@@ -52,6 +56,7 @@ function HTMLImageElement () {
 
     prop._disposeBKImage = function () {
         this.bkImage && this.bkImage.dispose();
+        this.bkImage = null;
     };
 
     Object.defineProperty(prop, 'src', {
