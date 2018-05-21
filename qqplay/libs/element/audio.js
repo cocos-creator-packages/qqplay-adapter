@@ -11,12 +11,12 @@ function HTMLAudioElement () {
     this._currentTime = 0;
 
     this.addEventListener('load', function () {
-        this.onLoad && this.onLoad();
+        this.onload && this.onload();
         this._loaded = true;
         !this._paused && this.play();
     }.bind(this));
     this.addEventListener('error', function () {
-        this.onError && this.onError();
+        this.onerror && this.onerror();
     }.bind(this));
 }
 
@@ -28,15 +28,10 @@ function HTMLAudioElement () {
             return;
         }
         var loop = this._loop ? -1 : 1;
-        if (loop === -1) {
-            if(!this._handle){
-                this._handle = new BK.Audio(this._loop ? 0 : 1, this._audioPath, loop);
-            }
-            this._handle.stopMusic();
-            this._handle.startMusic();
-        } else {
-            BK.Audio.playMusic(this._loop ? 0 : 1, this._audioPath, loop);
-        }
+        this._handle = new BK.Audio(this._loop ? 0 : 1, this._audioPath, loop);
+        this._handle.stopMusic();
+        this._handle.startMusic();
+        this._currentTime = -1;// todo 这里预先赋值为 -1 让 audio 的 resume 有效，后续如果 qqplay 支持了 currentTime 在进行完善
     };
 
     prop.pause = function () {
@@ -50,20 +45,17 @@ function HTMLAudioElement () {
     prop.resume = function () {
         this._paused = false;
         if (!this._handle) {
-            if (this._loop) {
-                this.play();
-            }
             return;
         }
         this._handle.resumeMusic();
     };
 
     prop.stop = function () {
+        this._paused = true;
         if (!this._handle) {
             return;
         }
         this._handle.stopMusic();
-        this._paused = true;
     };
 
     prop.canPlayType = function () {
@@ -126,7 +118,7 @@ function HTMLAudioElement () {
             return this._src;
         },
         set: function (val) {
-            if (val == this._src) {
+            if (val === this._src) {
                 return;
             }
 

@@ -7,9 +7,9 @@ var qpAdapter = {};
 
 qpAdapter.generateTempFileName = function(src){
     var tempName;
-    console.log("this._localFileName1 =" + src);
+    // console.log("this._localFileName1 =" + src);
     tempName = window["sha1"](src);
-    console.log("this._localFileName2 =" + tempName);
+    // console.log("this._localFileName2 =" + tempName);
     return tempName;
 };
 
@@ -23,7 +23,7 @@ qpAdapter.saveFile = function(saveFile, buffer) {
 
 qpAdapter.downloadFile = function(src, saveFile, callback){
     var httpReq = new BK.HttpUtil(src);
-    console.log("downloadFile src =" + src);
+    // console.log("downloadFile src =" + src);
     httpReq.setHttpMethod('get');
     httpReq.requestAsync(function (buffer, status) {
         // if (status >= 400 && status <= 417 || status >= 500 && status <= 505) {

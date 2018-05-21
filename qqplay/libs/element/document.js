@@ -51,7 +51,7 @@ function HTMLDocumentElement () {
             return canvas;
         }
         
-        if (tag == 'audio') {
+        if (tag === 'audio') {
             return new HTMLAudioElement();
         }
 

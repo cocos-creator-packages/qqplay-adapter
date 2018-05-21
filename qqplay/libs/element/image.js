@@ -27,6 +27,15 @@ function HTMLImageElement () {
 (function (prop) {
     prop.constructor = HTMLImageElement;
 
+    prop._loadedImage = function (val) {
+        this._src = val;
+        var image = BK.Image.loadImage(val);
+        this.width = image.width;
+        this.height = image.height;
+        image.dispose();
+        this.emit('load');
+    };
+
     prop._generateBKImage = function (val) {
         this.bkImage = BK.Image.loadImage(val);
         if (this.bkImage) {
@@ -42,9 +51,8 @@ function HTMLImageElement () {
         },
 
         set: function (val) {
-            this._src = val;
-
             if (!val) {
+                this._src = val;
                 this.width = this.height = 0;
                 this.bkImage = null;
                 this.emit('load');
@@ -62,12 +70,12 @@ function HTMLImageElement () {
                             this.emit('error', ret);
                         }
                         else {
-                            this._src = filePath;
+                            this._loadedImage(filePath);
                         }
                     }.bind(this));
                 }
                 else {
-                    this._src = filePath;
+                    this._loadedImage(filePath);
                 }
             }
             else if (/^data:image/.test(val)) {
@@ -75,10 +83,7 @@ function HTMLImageElement () {
                 this._localFileName = window["sha1"](this._src);
                 filePath = ImageCachePath + this._localFileName;
                 isFileValid = qpAdapter.isFileAvailable(filePath);
-                if (isFileValid) {
-                    this._src = filePath;
-                }
-                else {
+                if (!isFileValid) {
                     var base64str = val.replace(/data:image.+;base64,/, "");
                     var bytes = base64js.toByteArray(base64str);
                     var buffer = new BK.Buffer(bytes.length);
@@ -86,8 +91,11 @@ function HTMLImageElement () {
                         buffer.writeUint8Buffer(bytes[i]);
                     }
                     qpAdapter.saveFile(filePath, buffer);
-                    this._src = filePath;
                 }
+                this._loadedImage(filePath);
+            }
+            else {
+                this._loadedImage(val);
             }
         },
     });
