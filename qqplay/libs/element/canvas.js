@@ -22,13 +22,13 @@ function HTMLMainCanvasElement () {
             // generate bkimage
             var image = tempArguments[5];
             if (!image.bkImage) {
-                image._generateBKImage(image.src);
+                image._generateBKImage();
             }
             tempArguments[5] = image.bkImage;
             // apply textImage2D
             _gl_texImage2D.apply(this, tempArguments);
             // dispose bkImage
-            image.bkImage.dispose();
+            image._disposeBKImage();
         }
         else {
             _gl_texImage2D.apply(this, arguments);

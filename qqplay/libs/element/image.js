@@ -29,20 +29,29 @@ function HTMLImageElement () {
 
     prop._loadedImage = function (val) {
         this._src = val;
-        var image = BK.Image.loadImage(val);
-        this.width = image.width;
-        this.height = image.height;
-        image.dispose();
+        var bkImage = BK.Image.loadImage(val);
+        if (bkImage) {
+            this.width = bkImage.width;
+            this.height = bkImage.height;
+            bkImage.dispose();
+        }
         this.emit('load');
     };
 
-    prop._generateBKImage = function (val) {
-        this.bkImage = BK.Image.loadImage(val);
+    prop._generateBKImage = function () {
+        if (!this._src) {
+            console.warn('The image src value is empty. please check it');
+            return;
+        }
+        this.bkImage = BK.Image.loadImage(this._src);
         if (this.bkImage) {
             this.width = this.bkImage.width;
             this.height = this.bkImage.height;
-            this.emit('load');
         }
+    };
+
+    prop._disposeBKImage = function () {
+        this.bkImage && this.bkImage.dispose();
     };
 
     Object.defineProperty(prop, 'src', {
