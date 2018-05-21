@@ -21,15 +21,14 @@ function HTMLMainCanvasElement () {
             }
             // generate bkimage
             var image = tempArguments[5];
-            var bkImage = image.bkImage;
-            if (!bkImage) {
-                bkImage._generateBKImage(image.src);
+            if (!image.bkImage) {
+                image._generateBKImage();
             }
-            tempArguments[5] = bkImage;
+            tempArguments[5] = image.bkImage;
             // apply textImage2D
             _gl_texImage2D.apply(this, tempArguments);
             // dispose bkImage
-            bkImage.dispose();
+            image._disposeBKImage();
         }
         else {
             _gl_texImage2D.apply(this, arguments);
