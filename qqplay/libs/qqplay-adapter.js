@@ -123,7 +123,10 @@ prototype.addEventListener = function () {};
 prototype.createLinearGradient = function () {};
 prototype.setTransform = prototype.transforms;
 // todo strokeText
-prototype.strokeText = prototype.fillText;
+prototype.strokeText = prototype.strokeText = function () {
+    prototype.fillText.apply(this, arguments);
+    this.lineWidth = 0;
+};
 prototype.getImageData = function(){
     return {data : [1, 0, 1, 0]};
 };

@@ -31,7 +31,7 @@ function HTMLAudioElement () {
         this._handle = new BK.Audio(this._loop ? 0 : 1, this._audioPath, loop);
         this._handle.stopMusic();
         this._handle.startMusic();
-        this._currentTime = -1;// todo 这里预先赋值为 -1 让 audio 的 resume 有效，后续如果 qqplay 支持了 currentTime 在进行完善
+        this._currentTime = 0.00001;// todo 这里预先赋值为 0.00001 让 audio 的 resume 有效，后续如果 qqplay 支持了 currentTime 在进行完善
     };
 
     prop.pause = function () {
@@ -80,7 +80,7 @@ function HTMLAudioElement () {
 
     Object.defineProperty(prop, 'loop', {
         get: function () {
-            // api 限制，无法实现在播音频的循环
+            // api 限制，无法单独设置音频是否循环播放
             return this._loop;
         },
     
@@ -91,7 +91,7 @@ function HTMLAudioElement () {
 
     Object.defineProperty(prop, 'volume', {
         get: function () {
-            // api 限制，无法实现音量调节
+            // api 限制，无法进行音量调节
             return this._volume;
         },
         set: function (num) {
@@ -101,7 +101,7 @@ function HTMLAudioElement () {
 
     Object.defineProperty(prop, 'currentTime', {
         get: function () {
-            // api 限制，无法实现音量调节
+            // api 限制，无法获取音频当前播放的时间
             return this._currentTime;
         },
         set: function (num) {},
