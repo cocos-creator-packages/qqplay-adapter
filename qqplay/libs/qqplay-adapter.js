@@ -122,8 +122,11 @@ prototype.putImageData = function () {};
 prototype.addEventListener = function () {};
 prototype.createLinearGradient = function () {};
 prototype.setTransform = prototype.transforms;
-// todo strokeText
-prototype.strokeText = prototype.fillText;
+var _fillText = prototype.strokeText = prototype.fillText;
+prototype.fillText = function () {
+    this.lineWidth = 0;
+    _fillText.apply(this, arguments);
+};
 prototype.getImageData = function(){
     return {data : [1, 0, 1, 0]};
 };
