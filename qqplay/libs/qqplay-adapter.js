@@ -1,3 +1,28 @@
+/****************************************************************************
+ Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+
+ http://www.cocos.com
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated engine source code (the "Software"), a limited,
+ worldwide, royalty-free, non-assignable, revocable and non-exclusive license
+ to use Cocos Creator solely to develop games on your target platforms. You shall
+ not use Cocos Creator software for developing other software or tools that's
+ used for developing games. You are not granted to publish, distribute,
+ sublicense, and/or sell copies of Cocos Creator.
+
+ The software or tools in this License Agreement are licensed, not sold.
+ Xiamen Yaji Software Co., Ltd. reserves all rights not expressly granted to you.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ ****************************************************************************/
+
 BK.Script.loadlib('GameRes://libs/qqPlayCore.js');
 
 var gl;
@@ -13,13 +38,14 @@ var navigator = window.navigator = {
 BK.Script.loadlib('GameRes://libs/xmldom/dom-parser.js');
 
 // import element node
-BK.Script.loadlib('GameRes://libs/element/utils.js');
-BK.Script.loadlib('GameRes://libs/element/base.js');
-BK.Script.loadlib('GameRes://libs/element/audio.js');
-BK.Script.loadlib('GameRes://libs/element/image.js');
-BK.Script.loadlib('GameRes://libs/element/document.js');
-BK.Script.loadlib('GameRes://libs/element/canvas.js');
-BK.Script.loadlib('GameRes://libs/element/other.js');
+BK.Script.loadlib('GameRes://libs/element/Utils.js');
+BK.Script.loadlib('GameRes://libs/element/HTMLElemenet.js');
+BK.Script.loadlib('GameRes://libs/element/HTMLAudioElement.js');
+BK.Script.loadlib('GameRes://libs/element/HTMLImageElement.js');
+BK.Script.loadlib('GameRes://libs/element/HTMLScriptElement.js');
+BK.Script.loadlib('GameRes://libs/element/HTMLVideoElement.js');
+BK.Script.loadlib('GameRes://libs/element/Document.js');
+BK.Script.loadlib('GameRes://libs/element/Canvas.js');
 BK.Script.loadlib('GameRes://libs/element/XMLHttpRequest.js');
 
 window['XMLHttpRequest'] = XMLHttpRequest;
@@ -31,6 +57,8 @@ document = window.document = new HTMLDocumentElement();
 var canvas = new HTMLMainCanvasElement();
 canvas.id = 'GameCanvas';
 document.body.appendChild(canvas);
+
+var HTMLCanvasElement = BK.Canvas;
 
 var location = window.location = {
     href: "",
@@ -64,46 +92,50 @@ var WebGLRenderingContext = function () {};
 // 用于在加载引擎后对一些代码适配
 function initAdapter () {
 
-  var sps = BK.Director.screenPixelSize;
-  window.innerWidth = sps.width;
-  window.innerHeight = sps.height;
+    var sps = BK.Director.screenPixelSize;
+    window.innerWidth = sps.width;
+    window.innerHeight = sps.height;
 
-  canvas.width = sps.width;
-  canvas.height = sps.height;
+    canvas.width = sps.width;
+    canvas.height = sps.height;
 
+    // adapt _runMainLoop
+    cc.game._setAnimFrame = function () {
+        this._lastTime = new Date();
+        var frameRate = this.config[this.CONFIG_KEY.frameRate];
+        this._frameTime = 1000 / frameRate;
+        window.requestAnimFrame = window.requestAnimationFrame;
+        window.cancelAnimFrame = window.cancelAnimationFrame;
+    };
+    cc.game._runMainLoop = function () {
+        var self = this, callback, config = self.config, CONFIG_KEY = self.CONFIG_KEY,
+            director = cc.director,
+            frameRate = config[CONFIG_KEY.frameRate];
 
-  // adapter RendererWebGL
-  cc.rendererWebGL.__webGLRendering = cc.rendererWebGL.rendering;
-  cc.rendererWebGL.rendering = function (ctx, cmds) {
-      this.__webGLRendering(ctx, cmds);
-      gl.glCommit();
-  };
+        director.setDisplayStats(config[CONFIG_KEY.showFPS]);
 
-  // adapt _runMainLoop
-  cc.game._setAnimFrame = function () {
-      this._lastTime = new Date();
-      var frameRate = this.config[this.CONFIG_KEY.frameRate];
-      this._frameTime = 1000 / frameRate;
-      window.requestAnimFrame = window.requestAnimationFrame;
-      window.cancelAnimFrame = window.cancelAnimationFrame;
-  };
-  cc.game._runMainLoop = function () {
-      var self = this, callback, config = self.config, CONFIG_KEY = self.CONFIG_KEY,
-          director = cc.director,
-          frameRate = config[CONFIG_KEY.frameRate];
+        callback = function () {
+            if (!self._paused) {
+                self._intervalId = window.requestAnimFrame(callback);
+                director.mainLoop();
+            }
+        };
 
-      director.setDisplayStats(config[CONFIG_KEY.showFPS]);
+        self._intervalId = window.requestAnimFrame(callback);
+        self._paused = false;
+    };
 
-      callback = function () {
-          if (!self._paused) {
-              self._intervalId = window.requestAnimFrame(callback);
-              director.mainLoop();
-          }
-      };
+    // adapt component
+    BK.Script.loadlib('GameRes://libs/component/EditorBox.js');
+}
 
-      self._intervalId = window.requestAnimFrame(callback);
-      self._paused = false;
-  };
+function initRendererAdapter () {
+    cc.renderer.__render = cc.renderer.render;
+    cc.renderer.render = function (ecScene) {
+        this.__render(ecScene);
+        gl.glCommit();
+    };
+    gl.canvas = canvas;
 }
 
 Float32Array.prototype.subarray = function (begin, end) {
@@ -347,79 +379,10 @@ var clearInterval = window.clearInterval = function (intervalId) {
     }
 };
 
-// WebSocket
-var WebSocket = window.WebSocket = BK.WebSocket;
-
-WebSocket.CONNECTING = 0;
-WebSocket.OPEN = 1;
-WebSocket.CLOSING = 2;
-WebSocket.CLOSED = 3;
-
-// adaptation readyState
-// https://developer.mozilla.org/en-US/docs/Web/API/WebSocket#Ready_state_constants
-Object.defineProperty(WebSocket.prototype, "readyState", {
-    get: function () {
-        var readyState = this.getReadyState();
-        //console.log("defineProperty readyState" + readyState)
-        if (readyState === 4 /* ESTABLISHED */)
-            return WebSocket.OPEN;
-        if (readyState === 2 /* HANDSHAKE_REQ */ || readyState === 3 /* HANDSHAKE_RESP */)
-            return WebSocket.CONNECTING;
-        if (readyState === 1 /* CLOSING */)
-            return WebSocket.CLOSING;
-        if (readyState === 0 /* CLOSED */)
-            return WebSocket.CLOSED;
-        return -1;
-    }
-});
-
+// WebSocket.js
+BK.Script.loadlib('GameRes://libs/component/WebSocket.js');
 // Local Storage
-
-(function _adaptLocalStorage () {
-    var LocalStoragePath = 'GameSandBox://cc_local_storage.json';
-    window.localStorage = {//cc.sys.localStorage
-        _readData: function () {
-            if (!BK.FileUtil.isFileExist(LocalStoragePath)) {
-                return {};
-            }
-            try {
-                var buff = BK.FileUtil.readFile(LocalStoragePath);
-                return JSON.parse(buff.readAsString());
-            }
-            catch (e){
-                debugger;
-                return {};
-            }
-        },
-        _saveData: function (data) {
-            if (!data) return;
-            try {
-                BK.FileUtil.writeFile(LocalStoragePath, JSON.stringify(data));
-            }
-            catch (e){
-                debugger;
-                console.log('save data failed: '+  data);
-            }
-        },
-        getItem: function (key) {
-            var data = this._readData();
-            return data[key] || null;
-        },
-        setItem: function (key, content) {
-            var data = this._readData();
-            data[key] = content;
-            this._saveData(data);
-        },
-        removeItem: function (key) {
-            var data = this._readData();
-            delete data[key];
-            this._saveData(data);
-        },
-        clear: function () {
-            this._saveData({});
-        }
-    };
-})();
+BK.Script.loadlib('GameRes://libs/component/LocalStorage.js');
 
 // other adapter
 var performance = { now: function() { return BK.Time.timestamp * 1000; } };

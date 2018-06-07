@@ -48,6 +48,7 @@ function HTMLDocumentElement () {
             canvas.strokewidth = 0;
             canvas.strokeColor ={r:0,g:0,b:0,a:0};
             canvas.useH5Mode();
+            canvas.style = {};
             return canvas;
         }
         
