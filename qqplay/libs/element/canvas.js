@@ -11,7 +11,7 @@ function HTMLMainCanvasElement () {
         return [];
     };
     var _gl_texImage2D = gl.texImage2D;
-    gl.texImage2D = function() {
+    gl.texImage2D = function () {
         // generate and dispose BKImage
         if (6 === arguments.length && arguments[5] instanceof Image) {
             // create temp arguments
@@ -33,6 +33,39 @@ function HTMLMainCanvasElement () {
         else {
             _gl_texImage2D.apply(this, arguments);
         }
+    };
+
+    var _gl_texSubImage2D = gl.texSubImage2D;
+    gl.texSubImage2D = function () {
+        // generate and dispose BKImage
+        if (7 === arguments.length && arguments[6] instanceof Image) {
+            // create temp arguments
+            var tempArguments = [];
+            for (var i = 0; i < arguments.length; ++i) {
+                tempArguments.push(arguments[i]);
+            }
+            // generate bkimage
+            var image = tempArguments[6];
+            if (!image.bkImage) {
+                image._generateBKImage();
+            }
+            tempArguments[6] = image.bkImage;
+            // apply textImage2D
+            _gl_texSubImage2D.apply(this, tempArguments);
+            // dispose bkImage
+            image._disposeBKImage();
+        }
+        else {
+            _gl_texSubImage2D.apply(this, arguments);
+        }
+    };
+
+    var _gl_texParameteri = gl.texParameteri;
+    gl.texParameteri = function () {
+        if (3 === arguments.length && !arguments[1]) {
+            return;
+        }
+        _gl_texParameteri.apply(this, arguments);
     };
 
     var isSupportTA = undefined;

@@ -1,7 +1,7 @@
 // 工具类
-BK.Script.loadlib('GameRes://libs/element/sha1.min.js');
-BK.Script.loadlib('GameRes://libs/element/base64js.min.js');
-BK.Script.loadlib('GameRes://libs/element/text-encoder-lite.min.js');
+BK.Script.loadlib('GameRes://libs/other/sha1.min.js');
+BK.Script.loadlib('GameRes://libs/other/base64js.min.js');
+BK.Script.loadlib('GameRes://libs/other/text-encoder-lite.min.js');
 
 var qpAdapter = {};
 
