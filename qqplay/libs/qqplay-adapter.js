@@ -149,7 +149,15 @@ Uint16Array.prototype.subarray = function (begin, end) {
 //--BK.Canvas------------------------------------------------
 
 var prototype = BK.Canvas.prototype;
-prototype.createImageData = function () {};
+
+var tempImageData = {
+    data: [],
+    width: 0,
+    height: 0
+};
+prototype.createImageData = function () {
+    return tempImageData;
+};
 prototype.putImageData = function () {};
 prototype.addEventListener = function () {};
 prototype.createLinearGradient = function () {};
