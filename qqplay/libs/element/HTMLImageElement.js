@@ -34,6 +34,7 @@ function HTMLImageElement () {
             this.width = bkImage.width;
             this.height = bkImage.height;
         }
+        this.bkImage = bkImage;
         this.emit('load');
     };
 
