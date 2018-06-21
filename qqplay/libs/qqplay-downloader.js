@@ -120,30 +120,29 @@ function readText (item, callback) {
 }
 
 function downloadRemoteFile (item, callback) {
-    var relatUrl = item.url;
-    var remoteUrl = qqPlayDownloader.REMOTE_SERVER_ROOT + '/' + relatUrl;
+    var remoteUrl = qqPlayDownloader.REMOTE_SERVER_ROOT + '/' + item.url;
     item.url = remoteUrl;
 
     var httpReq = new BK.HttpUtil(remoteUrl);
     httpReq.setHttpMethod('get');
-    httpReq.requestAsync(function (buffer, status) {
+    httpReq.requestAsync(function (tempItem, buffer, status) {
         // if (status >= 400 && status <= 417 || status >= 500 && status <= 505) {
         if (status !== 200) {
             // Failed to save file, then just use remote url
             callback(null, null);
         }
         else {
-            item.url = qqPlayDownloader.GameSandBox_ROOT + '/' + relatUrl;
+            tempItem.url = qqPlayDownloader.GameSandBox_ROOT + '/' + tempItem.url;
             fs.writeBufferToFile(item.url, buffer);
             //
-            if (item.type && non_text_format.indexOf(item.type) !== -1) {
-                nextPipe(item, callback);
+            if (tempItem.type && non_text_format.indexOf(tempItem.type) !== -1) {
+                nextPipe(tempItem, callback);
             }
             else {
-                readText(item, callback);
+                readText(tempItem, callback);
             }
         }
-    });
+    }.bind(this, item));
 }
 
 /**
@@ -249,6 +248,14 @@ function downloadFont (item, callback) {
     callback(null, null);
 }
 
+function downloadAudio (item, callback) {
+    item.content = item.url;
+    var dom = document.createElement('audio');
+    dom.src = item.url;
+    item.element = dom;
+    callback(null, item.id);
+}
+
 var extMap = {
     // Font
     'font' : downloadFont,
@@ -257,6 +264,12 @@ var extMap = {
     'woff' : downloadFont,
     'svg' : downloadFont,
     'ttc' : downloadFont,
+
+    // Audio
+    'mp3' : downloadAudio,
+    'ogg' : downloadAudio,
+    'wav' : downloadAudio,
+    'm4a' : downloadAudio,
 };
 
 cc.loader.downloader.addHandlers(extMap);

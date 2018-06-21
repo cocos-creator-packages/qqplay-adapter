@@ -13,7 +13,6 @@ function HTMLAudioElement () {
     this.addEventListener('load', function () {
         this.onload && this.onload();
         this._loaded = true;
-        !this._paused && this.play();
     }.bind(this));
     this.addEventListener('error', function () {
         this.onerror && this.onerror();
@@ -29,8 +28,9 @@ function HTMLAudioElement () {
         }
         var loop = this._loop ? -1 : 1;
         this._handle = new BK.Audio(this._loop ? 0 : 1, this._audioPath, loop);
-        this._handle.stopMusic();
-        this._handle.startMusic();
+        this._handle.startMusic(function () {
+            this.emit('ended');
+        }.bind(this));
         this._currentTime = 0.00001;// todo 这里预先赋值为 0.00001 让 audio 的 resume 有效，后续如果 qqplay 支持了 currentTime 在进行完善
     };
 
@@ -75,7 +75,9 @@ function HTMLAudioElement () {
         get: function () {
             return this._paused;
         },
-        set: function (val) {},
+        set: function (val) {
+            this._paused = val;
+        },
     });
 
     Object.defineProperty(prop, 'loop', {
@@ -104,7 +106,9 @@ function HTMLAudioElement () {
             // api 限制，无法获取音频当前播放的时间
             return this._currentTime;
         },
-        set: function (num) {},
+        set: function (num) {
+            this._currentTime = num;
+        },
     });
 
     Object.defineProperty(prop, 'duration', {
@@ -128,25 +132,19 @@ function HTMLAudioElement () {
             }
 
             this._src = val;
-            setTimeout(function () {
-                this.emit('canplaythrough');
-            }.bind(this), 5);
-            
+            this.emit('canplaythrough');
+
             // loacl asset
             if (!/^http/.test(val)) {
                 this._audioPath = val;
-                setTimeout(function () {
-                    this.emit('load');
-                }.bind(this), 10);
+                this.emit('load');
                 return;
             }
     
             var localFileName = this._src.replace(/\//g, '-_-');
             this._audioPath = AudioCachePath + localFileName;
             if (BK.FileUtil.isFileExist(this._audioPath)) {
-                setTimeout(function () {
-                    this.emit('load');
-                }.bind(this), 10);
+                this.emit('load');
                 return;
             }
     
@@ -157,9 +155,7 @@ function HTMLAudioElement () {
                 this.status = status;
                 // if (status >= 400 && status <= 417 || status >= 500 && status <= 505) {
                 if (status !== 200) {
-                    setTimeout(function () {
-                        this.emit('error', status);
-                    }.bind(this), 10);
+                    this.emit('error', status);
                 }
                 //buffer
                 if(BK.FileUtil.isFileExist(AudioCachePath)){
@@ -167,9 +163,7 @@ function HTMLAudioElement () {
                 }
                 var filePath = AudioCachePath + localFileName;
                 BK.FileUtil.writeBufferToFile(filePath, buffer);
-                setTimeout(function () {
-                    this.emit('load');
-                }.bind(this), 10);
+                this.emit('load');
             }.bind(this));
         },
     });
