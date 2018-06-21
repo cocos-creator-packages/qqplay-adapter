@@ -142,7 +142,7 @@ function downloadRemoteFile (item, callback) {
                 readText(tempItem, callback);
             }
         }
-    }.bind(this, tempItem));
+    }.bind(this, item));
 }
 
 /**
@@ -253,7 +253,7 @@ function downloadAudio (item, callback) {
     var dom = document.createElement('audio');
     dom.src = item.url;
     item.element = dom;
-    callback(null, item.url);
+    callback(null, item.id);
 }
 
 var extMap = {
