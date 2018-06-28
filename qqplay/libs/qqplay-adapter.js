@@ -112,7 +112,7 @@ function initAdapter () {
             director = cc.director,
             frameRate = config[CONFIG_KEY.frameRate];
 
-        director.setDisplayStats(config[CONFIG_KEY.showFPS]);
+        cc.debug.setDisplayStats(config[CONFIG_KEY.showFPS]);
 
         callback = function () {
             if (!self._paused) {
@@ -231,27 +231,28 @@ function rgbToColor (rgbStr) {
                 r: parseInt(rgbStr[1] + rgbStr[1], 16) / 255,
                 g: parseInt(rgbStr[2] + rgbStr[2], 16) / 255,
                 b: parseInt(rgbStr[3] + rgbStr[3], 16) / 255,
-                a: 1,
+                a: parseInt(rgbStr[4] + rgbStr[4], 16),
             }
         } else if (rgbStr.length === 7) {
             return {
                 r: parseInt(rgbStr.substr(1, 2), 16) / 255,
                 g: parseInt(rgbStr.substr(3, 2), 16) / 255,
                 b: parseInt(rgbStr.substr(5, 2), 16) / 255,
-                a: 1,
+                a: parseInt(rgbStr.substr(7, 2), 16),
             };
         } else {
             return {r: 0, g: 0, b: 0, a: 1};
         }
     }
 
-    var strArr = rgbStr.match(/\d+/g);
+    var strArr = rgbStr.match(/(\d|\.)+/g);
     if (!strArr || strArr.length > 4 || strArr.length < 3) {
         return {r: 0, g: 0, b: 0, a: 1};
     }
     tempColor.r = strArr[0] / 255 || 0;
     tempColor.g = strArr[1] / 255 || 0;
     tempColor.b = strArr[2] / 255 || 0;
+    tempColor.a = strArr[3] || 1;
     return tempColor;
 }
 
