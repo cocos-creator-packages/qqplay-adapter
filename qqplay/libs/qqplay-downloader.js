@@ -249,11 +249,10 @@ function downloadFont (item, callback) {
 }
 
 function downloadAudio (item, callback) {
-    item.content = item.url;
     var dom = document.createElement('audio');
     dom.src = item.url;
     item.element = dom;
-    callback(null, item.id);
+    callback(null, dom);
 }
 
 var extMap = {
