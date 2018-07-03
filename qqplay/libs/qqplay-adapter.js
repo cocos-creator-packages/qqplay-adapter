@@ -102,17 +102,17 @@ function initAdapter () {
     // adapt _runMainLoop
     cc.game._setAnimFrame = function () {
         this._lastTime = new Date();
-        var frameRate = this.config[this.CONFIG_KEY.frameRate];
+        var frameRate = this.config.frameRate;
         this._frameTime = 1000 / frameRate;
         window.requestAnimFrame = window.requestAnimationFrame;
         window.cancelAnimFrame = window.cancelAnimationFrame;
     };
     cc.game._runMainLoop = function () {
-        var self = this, callback, config = self.config, CONFIG_KEY = self.CONFIG_KEY,
+        var self = this, callback, config = self.config,
             director = cc.director,
-            frameRate = config[CONFIG_KEY.frameRate];
+            frameRate = config.frameRate;
 
-        cc.debug.setDisplayStats(config[CONFIG_KEY.showFPS]);
+        cc.debug.setDisplayStats(config.showFPS);
 
         callback = function () {
             if (!self._paused) {
@@ -286,7 +286,7 @@ var _mainTicker;
 var requestAnimationFrame = window.requestAnimationFrame = function (callback) {
     if (!_mainTicker) {
         _mainTicker = new BK.Ticker();
-        var frameRate = cc.game.config[cc.game.CONFIG_KEY.frameRate];
+        var frameRate = cc.game.config.frameRate;
         _mainTicker.interval = 60 / frameRate;
         _mainTicker.setTickerCallBack(function (ts, duration) {
             if (!cc.game._paused) {
