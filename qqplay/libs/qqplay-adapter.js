@@ -129,7 +129,12 @@ function initAdapter () {
     BK.Script.loadlib('GameRes://libs/engine/EditorBox.js');
 }
 
+var rendererAdapterInited = false;
 function initRendererAdapter () {
+    if (rendererAdapterInited) {
+        return;
+    }
+    rendererAdapterInited = true;
     cc.renderer.__render = cc.renderer.render;
     cc.renderer.render = function (ecScene) {
         this.__render(ecScene);
