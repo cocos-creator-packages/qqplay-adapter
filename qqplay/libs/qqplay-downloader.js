@@ -35,7 +35,7 @@ var QQPlayDownloader = window.QQPlayDownloader = function () {
     this.async = true;
     this.pipeline = null;
     this.GameRes_ROOT = 'GameRes://';
-    this.GameSandBox_ROOT = 'GameSandBox://cc_QQPlayDownloader_';// local resources path
+    this.GameSandBox_ROOT = 'GameSandBox://cc_QQPlayDownloader_/';// local resources path
     this.REMOTE_SERVER_ROOT = '';
 };
 QQPlayDownloader.ID = ID;
@@ -119,7 +119,6 @@ function readText (item, callback) {
 
 function downloadRemoteFile (item, callback) {
     var remoteUrl = qqPlayDownloader.REMOTE_SERVER_ROOT + '/' + item.url;
-    item.url = remoteUrl;
 
     var httpReq = new BK.HttpUtil(remoteUrl);
     httpReq.setHttpMethod('get');
@@ -130,8 +129,8 @@ function downloadRemoteFile (item, callback) {
             callback(null, null);
         }
         else {
-            tempItem.url = qqPlayDownloader.GameSandBox_ROOT + '/' + tempItem.url;
-            fs.writeBufferToFile(item.url, buffer);
+            tempItem.url = qqPlayDownloader.GameSandBox_ROOT + tempItem.url;
+            fs.writeBufferToFile(tempItem.url, buffer);
             //
             if (tempItem.type && non_text_format.indexOf(tempItem.type) !== -1) {
                 nextPipe(tempItem, callback);
