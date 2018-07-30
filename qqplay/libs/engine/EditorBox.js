@@ -55,12 +55,8 @@ _p._beginEditing = function () {
         curEditBoxImpl = this;
         curEditBoxComp = this._node.getComponent(cc.EditBox);
     }
-
-    if (this._text !== '') {
-        BK.Editor.setText(this._text);
-    }
-
     BK.Editor.showKeyBoard(_onBKBtnClick.bind(this), _onBKTextChange.bind(this));
+    BK.Editor.setText(this._text);
     if (this._delegate && this._delegate.editBoxEditingDidBegan) {
         this._delegate.editBoxEditingDidBegan();
     }
