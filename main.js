@@ -53,7 +53,7 @@ function updateQqPlayCore (opts, cb) {
 
     profile = Editor.Profile.load('profile://local/qqplay-adapter.json');
 
-    if (Date.now() - profile.data['current-time'] < 60000) {
+    if (Date.now() - profile.data['current-time'] < day7) {
         return;
     }
 
