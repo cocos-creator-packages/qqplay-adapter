@@ -1,5 +1,12 @@
 {
   "name": "qqplay-adapter",
   "version": "1.0.0",
-  "build-template": "qqplay"
+  "build-template": "qqplay",
+  "main": "main.js",
+
+  "profiles": {
+    "local": {
+      "current-time": 0
+    }
+  }
 }
