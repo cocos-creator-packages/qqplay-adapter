@@ -6,7 +6,7 @@ let dialog = {
 };
 
 let log = {
-    complete: 'Update qqPlayCore completed, saved in %{path}',
+    complete: 'qqPlayCore updated to ${path}, rebuild the project please.',
     download_err: 'Failed to update qqPlayCore, %{err}'
 };
 
