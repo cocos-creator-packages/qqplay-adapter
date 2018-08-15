@@ -6,7 +6,7 @@ let dialog = {
 };
 
 let log = {
-    complete: '更新 qqPlayCore 脚本完成，代码所在地为 %{path}',
+    complete: 'qqPlayCore 已更新到 %{path}，请重新构建项目',
     download_err: '更新 qqPlayCore 失败, %{err}'
 };
 
