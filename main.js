@@ -1,6 +1,6 @@
 'use strict';
 
-const request = require('request');
+const download = require('download');
 const fs = require('fs');
 const path = require('path');
 const day7 = 604800000;
@@ -64,13 +64,9 @@ function updateQqPlayCore (opts, cb) {
     let default_templates_path = path.join(Editor.projectPath, 'build-templates', 'qqplay', 'libs');
     let qqPlayCore_path = path.join(default_templates_path, 'qqPlayCore.js');
 
-    request(remote_path, (err, response, data) => {
+    download(remote_path).then((buffer) => {
         console.log('download qqPlayCore successfully');
-
-        if (err) {
-            Editor.error(err);
-            return;
-        }
+        let data = buffer.toString();
         let remote_version = getVersion(data);
 
         if (fs.existsSync(qqPlayCore_path)) {
@@ -109,6 +105,8 @@ function updateQqPlayCore (opts, cb) {
                 });
             });
         }
+    }).catch((err)=>{
+        Editor.error(Editor.T('qqplay-adapter.log.download_err',{err: err}));
     });
 }
 
