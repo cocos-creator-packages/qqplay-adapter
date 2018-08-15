@@ -2,12 +2,12 @@
 
 let dialog = {
     message: 'Update tips',
-    detail: 'Check to qqPlayCore for a new version, update to the current project build-templates?',
+    detail: 'There is a new version of qqPlayCore, do you want to update to the build-templates of the current project?',
 };
 
 let log = {
     complete: 'Update qqPlayCore completed, saved in %{path}',
-    download_err: 'Update qqPlayCore fail, %{err}'
+    download_err: 'Failed to update qqPlayCore, %{err}'
 };
 
 

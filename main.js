@@ -1,9 +1,11 @@
 'use strict';
 
 const download = require('download');
-const fs = require('fs');
+const fs = require('fire-fs');
 const path = require('path');
 const day7 = 604800000;
+
+const remote_path = "http://hudong.qq.com/docs/engine/engine/native/qqPlayCore.js";
 
 let profile;
 
@@ -37,10 +39,12 @@ function getVersion (data) {
     return -1;
 }
 
-function saveTime () {
-    if (profile) {
-        profile.data['current-time'] = Date.now();
-        profile.save();
+function getFileStat (path) {
+    try {
+        return fs.statSync(path);
+    }
+    catch (err) {
+        return null;   
     }
 }
 
@@ -53,34 +57,30 @@ function updateQqPlayCore (opts, cb) {
 
     profile = Editor.Profile.load('profile://local/qqplay-adapter.json');
 
-    if (Date.now() - profile.data['current-time'] < day7) {
-        return;
-    }
-
-    console.log('start chack qqPlayCore');
-
-    let remote_path = "http://hudong.qq.com/docs/engine/engine/native/qqPlayCore.js";
     let local_core_path = Editor.url('packages://qqplay-adapter/qqplay/libs/qqPlayCore.js');
     let default_templates_path = path.join(Editor.projectPath, 'build-templates', 'qqplay', 'libs');
     let qqPlayCore_path = path.join(default_templates_path, 'qqPlayCore.js');
+    
+    let stat = getFileStat(qqPlayCore_path);
+    if (stat && (Date.now() - stat.mtime.getTime() < day7)) {
+        return;
+    }
 
     download(remote_path).then((buffer) => {
-        console.log('download qqPlayCore successfully');
         let data = buffer.toString();
         let remote_version = getVersion(data);
 
         if (fs.existsSync(qqPlayCore_path)) {
             let templates_version = getVersion(fs.readFileSync(qqPlayCore_path, 'utf8'));
             if (remote_version === templates_version) {
-                saveTime();
                 return;
             }
         }
-
-        let local_version = getVersion(fs.readFileSync(local_core_path, 'utf8'));
-        if (remote_version === local_version) {
-            saveTime();
-            return;
+        else {
+            let local_version = getVersion(fs.readFileSync(local_core_path, 'utf8'));
+            if (remote_version === local_version) {
+                return;
+            }
         }
 
         let resultId = Editor.Dialog.messageBox({
@@ -93,20 +93,18 @@ function updateQqPlayCore (opts, cb) {
             noLink: true,
         });
 
+
         if (resultId === 0) {
-            mkdirSync(default_templates_path, () => {
-                fs.writeFile(qqPlayCore_path, data, (err) => {
-                    if (err) {
-                        Editor.error(err);
-                        return;
-                    }
-                    Editor.log(Editor.T('qqplay-adapter.log.complete', { path: default_templates_path }));
-                    saveTime();
-                });
+            fs.outputFile(qqPlayCore_path, buffer, (err) => {
+                if (err) {
+                    Editor.error(err);
+                    return;
+                }
+                Editor.log(Editor.T('qqplay-adapter.log.complete', { path: default_templates_path }));
             });
         }
-    }).catch((err)=>{
-        Editor.error(Editor.T('qqplay-adapter.log.download_err',{err: err}));
+    }).catch((err) => {
+        console.warn(Editor.T('qqplay-adapter.log.download_err',{err: err}));
     });
 }
 
