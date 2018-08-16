@@ -35,6 +35,7 @@ function getFileStat (path) {
     }
 }
 
+let hasOpenMessageBox = false;
 function updateQqPlayCore (opts, cb) {
     if (opts.platform !== 'qqplay') {
         return cb();
@@ -49,34 +50,39 @@ function updateQqPlayCore (opts, cb) {
     let qqPlayCore_path = path.join(default_templates_path, 'qqPlayCore.js');
 
     // 检查时间是否满足
+    if (Date.now() - profile.data['time-last-check-for-update'] < minCheckDuration) {
+        return;
+    }
+
     let stat = getFileStat(qqPlayCore_path);
     if (stat && (Date.now() - stat.mtime.getTime() < minCheckDuration)) {
         return;
     }
 
-    if (Date.now() - profile.data['time-last-check-for-update'] < minCheckDuration) {
-        return;
-    }
-
+    // 保存检查时间，重新计算
+    saveProfile('time-last-check-for-update', Date.now());
     download(remote_path).then((buffer) => {
+        if (hasOpenMessageBox) {
+            return;
+        }
+
         let data = buffer.toString();
         let remote_version = getVersion(data);
 
         if (fs.existsSync(qqPlayCore_path)) {
             let templates_version = getVersion(fs.readFileSync(qqPlayCore_path, 'utf8'));
             if (remote_version === templates_version) {
-                saveProfile('time-last-check-for-update', Date.now());
                 return;
             }
         }
         else {
             let local_version = getVersion(fs.readFileSync(local_core_path, 'utf8'));
             if (remote_version === local_version) {
-                saveProfile('time-last-check-for-update', Date.now());
                 return;
             }
         }
 
+        hasOpenMessageBox = true;
         let resultId = Editor.Dialog.messageBox({
             type: 'info',
             buttons: [Editor.T('MESSAGE.yes'), Editor.T('MESSAGE.no')],
@@ -97,10 +103,9 @@ function updateQqPlayCore (opts, cb) {
                 Editor.log(Editor.T('qqplay-adapter.log.complete', { path: default_templates_path }));
             });
         }
-        saveProfile('time-last-check-for-update', Date.now());
+        hasOpenMessageBox = false;
     }).catch((err) => {
         console.warn(Editor.T('qqplay-adapter.log.download_err',{err: err}));
-        saveProfile('time-last-check-for-update', Date.now());
     });
 }
 
