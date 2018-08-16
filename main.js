@@ -54,23 +54,29 @@ function updateQqPlayCore (opts, cb) {
         return;
     }
 
-    // 检查远程版本号与本地版本号是否需要更新
-    let remote_version = profile.data['remote-version'];
-    if (fs.existsSync(qqPlayCore_path)) {
-        let templates_version = getVersion(fs.readFileSync(qqPlayCore_path, 'utf8'));
-        if (remote_version === templates_version) {
-            return;
-        }
-    }
-    else {
-        let local_version = getVersion(fs.readFileSync(local_core_path, 'utf8'));
-        if (remote_version === local_version) {
-            return;
-        }
+    if (Date.now() - profile.data['time-last-check-for-update'] < minCheckDuration) {
+        return;
     }
 
     download(remote_path).then((buffer) => {
         let data = buffer.toString();
+        let remote_version = getVersion(data);
+
+        if (fs.existsSync(qqPlayCore_path)) {
+            let templates_version = getVersion(fs.readFileSync(qqPlayCore_path, 'utf8'));
+            if (remote_version === templates_version) {
+                saveProfile('time-last-check-for-update', Date.now());
+                return;
+            }
+        }
+        else {
+            let local_version = getVersion(fs.readFileSync(local_core_path, 'utf8'));
+            if (remote_version === local_version) {
+                saveProfile('time-last-check-for-update', Date.now());
+                return;
+            }
+        }
+
         let resultId = Editor.Dialog.messageBox({
             type: 'info',
             buttons: [Editor.T('MESSAGE.yes'), Editor.T('MESSAGE.no')],
@@ -83,7 +89,6 @@ function updateQqPlayCore (opts, cb) {
 
         if (resultId === 0) {
             // 存储远程版本号
-            saveProfile('remote-version', getVersion(data));
             fs.outputFile(qqPlayCore_path, buffer, (err) => {
                 if (err) {
                     Editor.error(err);
@@ -92,8 +97,10 @@ function updateQqPlayCore (opts, cb) {
                 Editor.log(Editor.T('qqplay-adapter.log.complete', { path: default_templates_path }));
             });
         }
+        saveProfile('time-last-check-for-update', Date.now());
     }).catch((err) => {
         console.warn(Editor.T('qqplay-adapter.log.download_err',{err: err}));
+        saveProfile('time-last-check-for-update', Date.now());
     });
 }
 

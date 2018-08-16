@@ -6,7 +6,7 @@
 
   "profiles": {
     "local": {
-      "remote-version": 0
+      "time-last-check-for-update": 0
     }
   }
 }
