@@ -127,6 +127,7 @@ function initAdapter () {
 
     // adapt engine component
     BK.Script.loadlib('GameRes://libs/engine/EditorBox.js');
+    BK.Script.loadlib('GameRes://libs/engine/PNGReader.js');
 }
 
 var rendererAdapterInited = false;
@@ -154,14 +155,6 @@ Uint16Array.prototype.subarray = function (begin, end) {
 //--BK.Canvas------------------------------------------------
 
 var prototype = BK.Canvas.prototype;
-prototype.createImageData = function () {
-    return {
-        data: [],
-        width: 0,
-        height: 0
-    };
-};
-prototype.putImageData = function () {};
 prototype.addEventListener = function () {};
 prototype.createLinearGradient = function () {};
 prototype.setTransform = prototype.transforms;
