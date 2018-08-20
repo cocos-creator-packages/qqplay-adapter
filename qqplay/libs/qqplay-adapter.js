@@ -126,8 +126,7 @@ function initAdapter () {
     };
 
     // adapt engine component
-    BK.Script.loadlib('GameRes://libs/engine/EditorBox.js');
-    BK.Script.loadlib('GameRes://libs/engine/PNGReader.js');
+    BK.Script.loadlib('GameRes://libs/engine/index.js');
 }
 
 var rendererAdapterInited = false;
@@ -385,9 +384,9 @@ var clearInterval = window.clearInterval = function (intervalId) {
 };
 
 // WebSocket.js
-BK.Script.loadlib('GameRes://libs/engine/WebSocket.js');
+BK.Script.loadlib('GameRes://libs/engine/CCWebSocket.js');
 // Local Storage
-BK.Script.loadlib('GameRes://libs/engine/LocalStorage.js');
+BK.Script.loadlib('GameRes://libs/engine/CCLocalStorage.js');
 
 // other adapter
 var performance = { now: function() { return BK.Time.timestamp * 1000; } };
