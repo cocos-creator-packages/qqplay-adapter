@@ -63,20 +63,26 @@ var HTMLCanvasElement = BK.Canvas;
 var location = window.location = {
     href: "",
 };
+
 var console = window.console = {
-    log: function (msg) {
+    log: function () {
+        var msg = cc.js.formatStr.apply(null, arguments);
         BK.Script.log(1, 0, msg);
     },
-    warn: function (msg) {
+    warn: function () {
+        var msg = cc.js.formatStr.apply(null, arguments);
         BK.Script.log(1, 0, msg);
     },
-    error: function (msg) {
+    error: function () {
+        var msg = cc.js.formatStr.apply(null, arguments);
         BK.Script.log(1, 0, msg);
     },
-    info: function(msg) {
+    info: function() {
+        var msg = cc.js.formatStr.apply(null, arguments);
         BK.Script.log(1, 0, msg);
     },
-    debug: function(msg) {
+    debug: function() {
+        var msg = cc.js.formatStr.apply(null, arguments);
         BK.Script.log(1, 0, msg);
     },
 };
