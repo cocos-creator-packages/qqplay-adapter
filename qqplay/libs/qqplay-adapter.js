@@ -30,6 +30,9 @@ var window = this;
 window.addEventListener = function () {};
 window.removeEventListener = function () {};
 
+// todo 这个接口不能正常，会导致第三方接口都没法正常工作，暂时赋空
+window.Promise = null;
+
 var navigator = window.navigator = {
     userAgent: 'qqplay ' + GameStatusInfo.platform + ' QQ/' + GameStatusInfo.QQVer,
     appVersion: ''
