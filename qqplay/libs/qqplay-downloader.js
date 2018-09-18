@@ -35,7 +35,7 @@ var QQPlayDownloader = window.QQPlayDownloader = function () {
     this.async = true;
     this.pipeline = null;
     this.GameRes_ROOT = 'GameRes://';
-    this.GameSandBox_ROOT = 'GameSandBox://cc_QQPlayDownloader_/';// local resources path
+    this.GameSandBox_ROOT = 'GameSandBox://cc_QQPlayDownloader_';// local resources path
     this.REMOTE_SERVER_ROOT = '';
 };
 QQPlayDownloader.ID = ID;
@@ -71,7 +71,7 @@ QQPlayDownloader.prototype.handle = function (item, callback) {
     }
 
     var gameResUrl = this.GameRes_ROOT + item.url;
-    var gameSandBoxUrl = this.GameSandBox_ROOT + item.url;
+    var gameSandBoxUrl = this.GameSandBox_ROOT + '/' + item.url;
     var needDownload = true;
     if (fs.isFileExist(gameResUrl)) {
         item.url = gameResUrl;
@@ -129,7 +129,7 @@ function downloadRemoteFile (item, callback) {
             callback(null, null);
         }
         else {
-            tempItem.url = qqPlayDownloader.GameSandBox_ROOT + tempItem.url;
+            tempItem.url = qqPlayDownloader.GameSandBox_ROOT + '/' + tempItem.url;
             fs.writeBufferToFile(tempItem.url, buffer);
             //
             if (tempItem.type && non_text_format.indexOf(tempItem.type) !== -1) {
@@ -170,11 +170,11 @@ QQPlayDownloader.prototype.preload = function (remoteUrl, resources, callback) {
         var onCompleted = (function (err, resUrl, buffer) {
             if (err) {
                 errList[resUrl] = err;
-                console.error(err.message);
+                console.error(err);
             }
             else {
                 try {
-                    BK.FileUtil.writeBufferToFile(_this.GameSandBox_ROOT + resUrl, buffer);
+                    BK.FileUtil.writeBufferToFile(_this.GameSandBox_ROOT + '/' + resUrl, buffer);
                 }
                 catch (e) {
                     errList[resUrl] = e;
@@ -194,11 +194,24 @@ QQPlayDownloader.prototype.preload = function (remoteUrl, resources, callback) {
         var resource, errList = {};
         for (var i = 0, len = resources.length; i < len; ++i) {
             resource = resources[i];
-            // save pre-load res url
-            if (_this._preloads.indexOf(resource) === -1) {
-                _this._preloads.push(resource);
-            }
-            downloadRemoteFile(remoteUrl, resource, onCompleted);
+
+            var httpReq = new BK.HttpUtil(remoteUrl + '/' + resource);
+            httpReq.setHttpMethod('get');
+            httpReq.requestAsync(function (url, buffer, status) {
+                // save pre-load res url
+                if (_this._preloads.indexOf(url) === -1) {
+                    _this._preloads.push(url);
+                }
+
+                // if (status >= 400 && status <= 417 || status >= 500 && status <= 505) {
+                if (status !== 200) {
+                    // Failed to save file, then just use remote url
+                    onCompleted( 'Faild to download url: ' + url, url, null);
+                }
+                else {
+                    onCompleted(null, url, buffer);
+                }
+            }.bind(_this, resource));           
         }
     }
 };
