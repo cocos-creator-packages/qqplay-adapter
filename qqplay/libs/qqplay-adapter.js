@@ -217,8 +217,7 @@ Object.defineProperty(prototype, "font", {
     set: function (val) {
         this._font = val;
         if (val) {
-            var matchRet = val.match(/(\d*)px/);
-            var size = (matchRet && !isNaN(matchRet[1])) ? parseInt(matchRet[1]) : 20;
+            var size = parseFloat(val) || 20;
             //console.log("size" + size)
             this.setTextSize(size);
             var isBold = BOLD_REGEX.test(val);
