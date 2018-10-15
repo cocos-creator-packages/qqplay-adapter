@@ -30,6 +30,9 @@ var window = this;
 window.addEventListener = function () {};
 window.removeEventListener = function () {};
 
+// todo 这个接口不能正常，会导致第三方接口都没法正常工作，暂时赋空
+window.Promise = null;
+
 var navigator = window.navigator = {
     userAgent: 'qqplay ' + GameStatusInfo.platform + ' QQ/' + GameStatusInfo.QQVer,
     appVersion: ''
@@ -214,8 +217,7 @@ Object.defineProperty(prototype, "font", {
     set: function (val) {
         this._font = val;
         if (val) {
-            var matchRet = val.match(/(\d*)px/);
-            var size = (matchRet && !isNaN(matchRet[1])) ? parseInt(matchRet[1]) : 20;
+            var size = parseFloat(val) || 20;
             //console.log("size" + size)
             this.setTextSize(size);
             var isBold = BOLD_REGEX.test(val);
