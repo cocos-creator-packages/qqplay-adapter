@@ -7,7 +7,18 @@ function HTMLMainCanvasElement () {
         return;
     }
     gl = bkWebGLGetInstance();
-    gl.getImageData = gl.getExtension = gl.getSupportedExtensions = function () {
+    gl.getExtension = function (name) {
+        if (name === "OES_texture_float" ||
+            name === "WEBKIT_OES_texture_float" ||
+            name === "MOZ_OES_texture_float") {
+            return null;
+        }
+        return {};
+    };
+    gl.getSupportedExtensions = function () {
+        return {};
+    };
+    gl.getImageData = function () {
         return [];
     };
     var _gl_texImage2D = gl.texImage2D;

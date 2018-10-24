@@ -23,7 +23,8 @@
 
 var REGEX = /^\w+:\/\/.*/;
 var non_text_format = [
-    'js','png','jpg','bmp','jpeg','gif','ico','tiff','webp','image','mp3','ogg','wav','m4a','font','eot','ttf','woff','svg','ttc'
+    'js','png','jpg','bmp','jpeg','gif','ico','tiff','webp','image','mp3',
+    'ogg','wav','m4a','font','eot','ttf','woff','svg','ttc','bin'
 ];
 
 var ID = 'QQPlayDownloader';
