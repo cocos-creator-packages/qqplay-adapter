@@ -1,65 +1,163 @@
+/****************************************************************************
+ Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+
+ http://www.cocos.com
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated engine source code (the "Software"), a limited,
+ worldwide, royalty-free, non-assignable, revocable and non-exclusive license
+ to use Cocos Creator solely to develop games on your target platforms. You shall
+ not use Cocos Creator software for developing other software or tools that's
+ used for developing games. You are not granted to publish, distribute,
+ sublicense, and/or sell copies of Cocos Creator.
+
+ The software or tools in this License Agreement are licensed, not sold.
+ Xiamen Yaji Software Co., Ltd. reserves all rights not expressly granted to you.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ ****************************************************************************/
 
 var AudioCachePath = 'GameSandBox://AudioCache7dwe/';
 
-function HTMLAudioElement () {
-    _HTMLBaseElemenet.call(this);
+var SN_SEED = 1;
+var _audioContextMap = {};
 
-    this._src = '';
-    this._audioPath = '';
-    this._paused = true;
-    this._loaded = false;
-    this._currentTime = 0;
+function HTMLAudioElement (url) {
+    var self = this;
+    _HTMLBaseElemenet.call(self);
 
-    this.addEventListener('load', function () {
-        this.onload && this.onload();
-        this._loaded = true;
-    }.bind(this));
-    this.addEventListener('error', function () {
-        this.onerror && this.onerror();
-    }.bind(this));
+    self._$sn = SN_SEED++;
+
+    self.HAVE_NOTHING = 0;      //-- 没有关于音频/视频是否就绪的信息
+    self.HAVE_METADATA = 1;     //-- 关于音频/视频就绪的元数据
+    self.HAVE_CURRENT_DATA = 2; //-- 关于当前播放位置的数据是可用的，但没有足够的数据来播放下一帧/毫秒
+    self.HAVE_FUTURE_DATA = 3;  //-- 当前及至少下一帧的数据是可用的
+    self.HAVE_ENOUGH_DATA = 4;  //-- 可用数据足以开始播放
+
+    var audioContext = BK.createAudioContext();
+    _audioContextMap[self._$sn] = audioContext;
+
+    // 用于存储本地音频对路径
+    self.localSrc = '';
+
+    if (url) {
+        self.src = url;
+    }
+    else {
+        self._src = '';
+    }
+
+    self._loop = audioContext.loop;
+    self._autoplay = audioContext.autoplay;
+    self._volume = audioContext.volume;
+    self._muted = audioContext.muted;
+    self._currentTime = audioContext.currentTime;
+    self._loaded = false;
+
+    self._canplayEvents = [
+        'canplay',
+        'canplaythrough',
+        'loadeddata',
+        'loadedmetadata'
+    ];
+
+    audioContext.on('loadstart', function () {
+        self._loaded = false;
+        self.readyState = self.HAVE_NOTHING;
+        self.dispatchEvent({type: 'loadstart'});
+    });
+
+    audioContext.on('loadedmetadata', function () {
+        self._loaded = true;
+        self.readyState = self.HAVE_METADATA;
+        self.dispatchEvent({type: 'loadedmetadata'});
+    });
+
+    audioContext.on('canplay', function () {
+        self._loaded = true;
+        self.readyState = self.HAVE_ENOUGH_DATA;
+        self.dispatchEvent({type: 'canplay'});
+    });
+
+    audioContext.on('canplaythrough', function () {
+        self._loaded = true;
+        self.readyState = self.HAVE_ENOUGH_DATA;
+        self.dispatchEvent({type: 'canplaythrough'});
+    });
+
+    audioContext.on('loadeddata', function () {
+        self._loaded = true;
+        self.readyState = self.HAVE_ENOUGH_DATA;
+        self.dispatchEvent({type: 'loadeddata'});
+    });
+
+    audioContext.on('play', function () {
+        self.dispatchEvent({type: 'play'});
+    });
+    audioContext.on('pause', function () {
+        self.dispatchEvent({type: 'pause'});
+    });
+    audioContext.on('playing', function () {
+        self.dispatchEvent({type: 'playing'});
+    });
+    audioContext.on('ended', function () {
+        self.dispatchEvent({type: 'ended'});
+    });
+    audioContext.on('error', function () {
+        self.dispatchEvent({type: 'error'});
+    });
+    audioContext.on('seeked', function () {
+        self.dispatchEvent({type: 'seeked'});
+    });
+    audioContext.on('seeking', function () {
+        self.dispatchEvent({type: 'seeking'});
+    });
+    audioContext.on('timeupdate', function () {});
+    audioContext.on('volumechange', function () {});
+
+    self.onload = null;
+    self.onerror = null;
+    self.addEventListener('loaded', function () {
+        self.onload && self.onload();
+        self._loaded = true;
+    });
+    self.addEventListener('error', function (errMsg) {
+        self.onerror && self.onerror(errMsg);
+        self._loaded = false;
+    });
 }
 
 (function (prop) {
 
     prop.play = function () {
-        this._paused = false;
-        if(!this._loaded){
-            return;
-        }
-        var loop = this._loop ? -1 : 1;
-        this._handle = new BK.Audio(this._loop ? 0 : 1, this._audioPath, loop);
-        this._handle.startMusic(function () {
-            this.emit('ended');
-        }.bind(this));
-        this._currentTime = 0.00001;// todo 这里预先赋值为 0.00001 让 audio 的 resume 有效，后续如果 qqplay 支持了 currentTime 在进行完善
+        _audioContextMap[this._$sn].play();
     };
 
     prop.pause = function () {
-        this._paused = true;
-        if (!this._handle) {
-            return;
-        }
-        this._handle.pauseMusic();
+        _audioContextMap[this._$sn].pause();
     };
 
     prop.resume = function () {
-        this._paused = false;
-        if (!this._handle) {
-            return;
-        }
-        this._handle.resumeMusic();
+        _audioContextMap[this._$sn].resume();
     };
 
     prop.stop = function () {
-        this._paused = true;
-        if (!this._handle) {
-            return;
-        }
-        this._handle.stopMusic();
+        _audioContextMap[this._$sn].stop();
     };
 
-    prop.canPlayType = function () {
-        return true;
+    prop.canPlayType = function (mediaType) {
+        // todo 目前只支持 audio/mpeg
+        _audioContextMap[this._$sn].canPlayType('audio/mpeg');
+    };
+
+    prop.destroy = function () {
+        _audioContextMap[this._$sn].destroy();
     };
 
     prop.appendChild = function (element) {
@@ -71,50 +169,67 @@ function HTMLAudioElement () {
         }
     };
 
-    Object.defineProperty(prop, 'paused', {
+    Object.defineProperty(prop, 'currentTime', {
         get: function () {
-            return this._paused;
+            return (_audioContextMap[this._$sn].currentTime / 1000.0);
         },
         set: function (val) {
-            this._paused = val;
+            // current Time 是以毫秒为单位
+            _audioContextMap[this._$sn].currentTime = (val * 1000.0);
+        },
+    });
+
+    Object.defineProperty(prop, 'autoplay', {
+        get: function () {
+            return _audioContextMap[this._$sn].autoplay;
+        },
+        set: function (val) {
+            _audioContextMap[this._$sn].autoplay = val;
+            this._autoplay = val;
         },
     });
 
     Object.defineProperty(prop, 'loop', {
         get: function () {
-            // api 限制，无法单独设置音频是否循环播放
             return this._loop;
         },
-    
-        set:function (bool) {
-            this._loop = bool;
+
+        set:function (val) {
+            _audioContextMap[this._$sn].loop = val;
+            this._loop = val;
         },
     });
 
     Object.defineProperty(prop, 'volume', {
         get: function () {
-            // api 限制，无法进行音量调节
             return this._volume;
         },
-        set: function (num) {
-            this._volume = num;
+        set: function (val) {
+            _audioContextMap[this._$sn].volume = val;
+            this._volume = val;
         },
     });
 
-    Object.defineProperty(prop, 'currentTime', {
+    Object.defineProperty(prop, 'muted', {
         get: function () {
-            // api 限制，无法获取音频当前播放的时间
-            return this._currentTime;
+            return this._muted;
         },
-        set: function (num) {
-            this._currentTime = num;
+        set: function (val) {
+            _audioContextMap[this._$sn].muted = val;
+            this._muted = val;
         },
     });
 
     Object.defineProperty(prop, 'duration', {
         get: function () {
-            return 0;
+            return (_audioContextMap[this._$sn].duration / 1000.0);
         },
+    });
+
+    Object.defineProperty(prop, 'paused', {
+        get: function () {
+            return _audioContextMap[this._$sn].paused;
+        }
     });
 
     Object.defineProperty(prop, 'src', {
@@ -122,49 +237,39 @@ function HTMLAudioElement () {
             return this._src;
         },
         set: function (val) {
-            if (val === this._src) {
-                return;
-            }
+            var self = this;
+            self._src = val;
+            self._load = false;
+            self.readyState = this.HAVE_NOTHING;
 
-            if (this._handle) {
-                this._handle.stopMusic();
-                this._handle = null;
-            }
+            var audioContex = _audioContextMap[self._$sn];
 
-            this._src = val;
-            this.emit('canplaythrough');
+            // 如果是远程资源，需要先加载到本地
+            if (/^http/.test(val)) {
 
-            // loacl asset
-            if (!/^http/.test(val)) {
-                this._audioPath = val;
-                this.emit('load');
-                return;
-            }
-    
-            var localFileName = this._src.replace(/\//g, '-_-');
-            this._audioPath = AudioCachePath + localFileName;
-            if (BK.FileUtil.isFileExist(this._audioPath)) {
-                this.emit('load');
-                return;
-            }
-    
-            // GameSandBox://
-            var httpReq = new BK.HttpUtil(val);
-            httpReq.setHttpMethod('get');
-            httpReq.requestAsync(function (buffer, status) {
-                this.status = status;
-                // if (status >= 400 && status <= 417 || status >= 500 && status <= 505) {
-                if (status !== 200) {
-                    this.emit('error', status);
+                self.localSrc = qpAdapter.generateTempFileName(AudioCachePath, val) + '.mp3';
+
+                if (BK.fileSystem.accessSync(self.localSrc)) {
+                    audioContex.src = self.localSrc;
+                    this.emit('loaded');
+                    return;
                 }
-                //buffer
-                if(BK.FileUtil.isFileExist(AudioCachePath)){
-                    BK.FileUtil.makeDir(AudioCachePath);
-                }
-                var filePath = AudioCachePath + localFileName;
-                BK.FileUtil.writeBufferToFile(filePath, buffer);
-                this.emit('load');
-            }.bind(this));
+
+                qpAdapter.downloadFile(val, self.localSrc, function (err) {
+                    if (err) {
+                        console.log(err);
+                        self.emit('error', err);
+                        return;
+                    }
+                    audioContex.src = self.localSrc;
+                    self.emit('loaded');
+                })
+            }
+            else {
+                self.localSrc = val;
+                audioContex.src = val;
+                self.emit('loaded');
+            }
         },
     });
 

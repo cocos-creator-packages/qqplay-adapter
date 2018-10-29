@@ -24,12 +24,10 @@
 var REGEX = /^\w+:\/\/.*/;
 var non_text_format = [
     'js','png','jpg','bmp','jpeg','gif','ico','tiff','webp','image','mp3',
-    'ogg','wav','m4a','font','eot','ttf','woff','svg','ttc','bin'
+    'ogg','wav','m4a','font','eot','ttf','woff','svg','ttc', 'bin'
 ];
 
 var ID = 'QQPlayDownloader';
-
-var fs = BK.FileUtil;
 
 var QQPlayDownloader = window.QQPlayDownloader = function () {
     this.id = ID;
@@ -74,11 +72,11 @@ QQPlayDownloader.prototype.handle = function (item, callback) {
     var gameResUrl = this.GameRes_ROOT + item.url;
     var gameSandBoxUrl = this.GameSandBox_ROOT + '/' + item.url;
     var needDownload = true;
-    if (fs.isFileExist(gameResUrl)) {
+    if (BK.fileSystem.accessSync(gameResUrl)) {
         item.url = gameResUrl;
         needDownload = false;
     }
-    else if (fs.isFileExist(gameSandBoxUrl)) {
+    else if (BK.fileSystem.accessSync(gameSandBoxUrl)) {
         item.url = gameSandBoxUrl;
         needDownload = false;
     }
@@ -104,7 +102,7 @@ function nextPipe (item, callback) {
     var queue = cc.LoadingItems.getQueue(item);
     queue.addListener(item.id, function (item) {
         if (item.error) {
-            if (!fs.deleteFile(item.url)) {
+            if (!BK.fileSystem.unlinkSync(item.url)) {
                 cc.log('Load failed, removed local file ' + item.url + ' successfully!');
             }
         }
@@ -113,25 +111,24 @@ function nextPipe (item, callback) {
 }
 
 function readText (item, callback) {
-    var buffer = fs.readFile(item.url);
-    item.states[cc.loader.downloader.id] = cc.Pipeline.ItemState.COMPLETE;
-    callback(null, buffer.readAsString(true));
+    var content = BK.fileSystem.readFileSync(item.url, 'utf8');
+    if (!content) {
+        callback( "Read text file failed: " + item.url, null);
+        item.states[cc.loader.downloader.id] = cc.Pipeline.ItemState.ERROR;
+    }
+    else {
+        item.states[cc.loader.downloader.id] = cc.Pipeline.ItemState.COMPLETE;
+        callback(null, content);
+    }
 }
 
 function downloadRemoteFile (item, callback) {
-    var remoteUrl = qqPlayDownloader.REMOTE_SERVER_ROOT + '/' + item.url;
+    BK.Http.request({
+        url: qqPlayDownloader.REMOTE_SERVER_ROOT + '/' + item.url,
 
-    var httpReq = new BK.HttpUtil(remoteUrl);
-    httpReq.setHttpMethod('get');
-    httpReq.requestAsync(function (tempItem, buffer, status) {
-        // if (status >= 400 && status <= 417 || status >= 500 && status <= 505) {
-        if (status !== 200) {
-            // Failed to save file, then just use remote url
-            callback(null, null);
-        }
-        else {
+        success: function (tempItem, succObj) {
             tempItem.url = qqPlayDownloader.GameSandBox_ROOT + '/' + tempItem.url;
-            fs.writeBufferToFile(tempItem.url, buffer);
+            BK.fileSystem.writeFileSync(tempItem.url, succObj.arrayBuffer());
             //
             if (tempItem.type && non_text_format.indexOf(tempItem.type) !== -1) {
                 nextPipe(tempItem, callback);
@@ -139,8 +136,12 @@ function downloadRemoteFile (item, callback) {
             else {
                 readText(tempItem, callback);
             }
+        }.bind(this, item),
+
+        fail: function (errObj) {
+            callback && callback(errObj.msg, null);
         }
-    }.bind(this, item));
+    });
 }
 
 /**
@@ -175,7 +176,7 @@ QQPlayDownloader.prototype.preload = function (remoteUrl, resources, callback) {
             }
             else {
                 try {
-                    BK.FileUtil.writeBufferToFile(_this.GameSandBox_ROOT + '/' + resUrl, buffer);
+                    BK.fileSystem.writeFileSync(_this.GameSandBox_ROOT + '/' + resUrl, buffer);
                 }
                 catch (e) {
                     errList[resUrl] = e;
@@ -196,23 +197,21 @@ QQPlayDownloader.prototype.preload = function (remoteUrl, resources, callback) {
         for (var i = 0, len = resources.length; i < len; ++i) {
             resource = resources[i];
 
-            var httpReq = new BK.HttpUtil(remoteUrl + '/' + resource);
-            httpReq.setHttpMethod('get');
-            httpReq.requestAsync(function (url, buffer, status) {
-                // save pre-load res url
-                if (_this._preloads.indexOf(url) === -1) {
-                    _this._preloads.push(url);
-                }
+            BK.Http.request({
+                url: remoteUrl + '/' + resource,
 
-                // if (status >= 400 && status <= 417 || status >= 500 && status <= 505) {
-                if (status !== 200) {
-                    // Failed to save file, then just use remote url
-                    onCompleted( 'Faild to download url: ' + url, url, null);
-                }
-                else {
-                    onCompleted(null, url, buffer);
-                }
-            }.bind(_this, resource));           
+                success: function (url, succObj) {
+                    // save pre-load res url
+                    if (_this._preloads.indexOf(url) === -1) {
+                        _this._preloads.push(url);
+                    }
+                    onCompleted(null, url, succObj.arrayBuffer());
+                }.bind(this, resource),
+
+                fail: function (url, errObj) {
+                    onCompleted(errObj.msg, url, null);
+                }.bind(this, resource)
+            });
         }
     }
 };
@@ -228,7 +227,7 @@ QQPlayDownloader.prototype.preload = function (remoteUrl, resources, callback) {
 QQPlayDownloader.prototype.cleanAllAssets = function () {
     for (var i = 0, len = this._preloads.length; i < len; ++i) {
         var path = this._preloads[i];
-        if (!BK.FileUtil.deleteFile(path)) {
+        if (!BK.fileSystem.unlinkSync(path)) {
             cc.warn('Failed to remove file(' + path + '): unknown error');
         }
     }
@@ -237,11 +236,10 @@ QQPlayDownloader.prototype.cleanAllAssets = function () {
 var qqPlayDownloader = window.qqPlayDownloader = new QQPlayDownloader();
 
 function downloadText (item, callback) {
-    var buffer = BK.FileUtil.readFile(item.url);
-    var content = buffer.readAsString();
+    var content = BK.fileSystem.readFileSync(item.url, 'utf8');
     var error = null;
     if (!content) {
-        error = 'Failed to load: The url is ( '+ item.url + ' ).';
+        error = 'Load text file failed: The url is ( '+ item.url + ' ).';
     }
     callback(null, content);
 }
@@ -261,9 +259,14 @@ function downloadFont (item, callback) {
 
 function downloadAudio (item, callback) {
     var dom = document.createElement('audio');
-    dom.src = item.url;
     item.element = dom;
-    callback(null, dom);
+    dom.onload = function () {
+        callback(null, dom);
+    };
+    dom.onerror = function (err) {
+        callback(err, null);
+    };
+    dom.src = item.url;
 }
 
 var extMap = {
