@@ -69,11 +69,11 @@ function HTMLImageElement () {
                     self.emit('load');
                 }
                 else {
-                    self.emit('error', ["异步加载图片失败 :" + data.path + " code:" + data.errcode + " msg:" + data.errmsg]);
+                    self.emit('error', "异步加载图片失败 :" + data.path + " code:" + data.errcode + " msg:" + data.errmsg);
                 }
             },
             'fail': function (obj) {
-                self.emit('error', ["异步加载图片失败 :" + data.path + " code:" + data.errcode + " msg:" + data.errmsg]);
+                self.emit('error', "异步加载图片失败 :" + data.path + " code:" + data.errcode + " msg:" + data.errmsg);
             }
         });
     };
@@ -125,7 +125,7 @@ function HTMLImageElement () {
                 if (/^http/.test(val)) {
                     qpAdapter.downloadFile(val, filePath, function (ret, buffer) {
                         if (ret) {
-                            this.emit('error', [ret]);
+                            this.emit('error', ret);
                         }
                         else {
                             this._loadedImage(filePath);

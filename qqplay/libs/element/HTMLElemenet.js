@@ -50,7 +50,7 @@ function _HTMLEventElement () {
         var list = this._events[name];
         if (!list) return;
         for (var i = 0; i < list.length; i++) {
-            list[i].apply(this, args);
+            list[i].apply(this, [args]);
         }
     };
 
