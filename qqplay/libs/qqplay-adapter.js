@@ -30,28 +30,19 @@ var window = this;
 window.addEventListener = function () {};
 window.removeEventListener = function () {};
 
-// todo 这个接口不能正常，会导致第三方接口都没法正常工作，暂时赋空
-window.Promise = null;
-
 var navigator = window.navigator = {
     userAgent: 'qqplay ' + GameStatusInfo.platform + ' QQ/' + GameStatusInfo.QQVer,
     appVersion: ''
 };
 
+var location = window.location = {
+    href: "",
+};
+
 BK.Script.loadlib('GameRes://libs/xmldom/dom-parser.js');
 
 // import element node
-BK.Script.loadlib('GameRes://libs/element/Utils.js');
-BK.Script.loadlib('GameRes://libs/element/HTMLElemenet.js');
-BK.Script.loadlib('GameRes://libs/element/HTMLAudioElement.js');
-BK.Script.loadlib('GameRes://libs/element/HTMLImageElement.js');
-BK.Script.loadlib('GameRes://libs/element/HTMLScriptElement.js');
-BK.Script.loadlib('GameRes://libs/element/HTMLVideoElement.js');
-BK.Script.loadlib('GameRes://libs/element/Document.js');
-BK.Script.loadlib('GameRes://libs/element/Canvas.js');
-BK.Script.loadlib('GameRes://libs/element/XMLHttpRequest.js');
-
-window['XMLHttpRequest'] = XMLHttpRequest;
+BK.Script.loadlib('GameRes://libs/element/index.js');
 
 HTMLElement = _HTMLBaseElemenet;
 Image = window.Image = HTMLImageElement;
@@ -62,10 +53,6 @@ canvas.id = 'GameCanvas';
 document.body.appendChild(canvas);
 
 var HTMLCanvasElement = BK.Canvas;
-
-var location = window.location = {
-    href: "",
-};
 
 var console = window.console = {
     log: function () {
@@ -109,24 +96,23 @@ function initAdapter () {
     canvas.height = sps.height;
 
     // adapt _runMainLoop
+
     cc.game._setAnimFrame = function () {
         this._lastTime = new Date();
-        var frameRate = this.config.frameRate;
-        this._frameTime = 1000 / frameRate;
+        this._frameTime = 1000 / this.config.frameRate;
         window.requestAnimFrame = window.requestAnimationFrame;
         window.cancelAnimFrame = window.cancelAnimationFrame;
     };
-    cc.game._runMainLoop = function () {
-        var self = this, callback, config = self.config,
-            director = cc.director,
-            frameRate = config.frameRate;
 
-        cc.debug.setDisplayStats(config.showFPS);
+    var callback, self;
+    cc.game._runMainLoop = function () {
+        self = this;
+        cc.debug.setDisplayStats(self.config.showFPS);
 
         callback = function () {
             if (!self._paused) {
                 self._intervalId = window.requestAnimFrame(callback);
-                director.mainLoop();
+                cc.director.mainLoop();
             }
         };
 
@@ -391,11 +377,9 @@ var clearInterval = window.clearInterval = function (intervalId) {
     }
 };
 
-// WebSocket.js
-BK.Script.loadlib('GameRes://libs/engine/CCWebSocket.js');
-// Local Storage
-BK.Script.loadlib('GameRes://libs/engine/CCLocalStorage.js');
-
 // other adapter
 var performance = { now: function() { return BK.Time.timestamp * 1000; } };
+
+// todo 这个接口不能正常，会导致第三方接口都没法正常工作，暂时赋空
+window.Promise = null;
 
