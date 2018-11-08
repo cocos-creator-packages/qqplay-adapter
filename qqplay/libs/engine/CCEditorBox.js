@@ -66,15 +66,15 @@ if (cc.EditBox) {
 
     function _showTextLabel () {
         if (component) {
-            component._textLabel.node.active = true;
-            component._placeholderLabel.node.active = false;
+            component.textLabel && (component.textLabel.node.active = true);
+            component.placeholderLabel && (component.placeholderLabel.node.active = false);
         }
     }
 
     function _hideTextLabel () {
         if (component) {
-            component._textLabel.node.active = false;
-            component._placeholderLabel.node.active = true;
+            component.textLabel && (component.textLabel.node.active = false);
+            component.placeholderLabel && (component.placeholderLabel.node.active = true);
         }
     }
 
