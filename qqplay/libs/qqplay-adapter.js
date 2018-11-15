@@ -133,6 +133,8 @@ function initRendererAdapter () {
     cc.renderer.__render = cc.renderer.render;
     cc.renderer.render = function (ecScene) {
         this.__render(ecScene);
+        // In order to avoid the qqplay get the wrong vbo after unbind buffer. 
+        cc.renderer.device._current.reset();
         gl.glCommit();
     };
     gl.canvas = canvas;
