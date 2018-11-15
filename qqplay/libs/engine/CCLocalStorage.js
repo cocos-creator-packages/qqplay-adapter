@@ -24,7 +24,7 @@
  ****************************************************************************/
 
 /*
- *  适配本地存储
+ *  Adapt to local storage
  *  https://hudong.qq.com/docs/engine/api-new/basics/storage/localStorage.html
  */
 window.localStorage = BK.localStorage;

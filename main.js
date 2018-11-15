@@ -25,6 +25,9 @@
 
 'use strict';
 
+const JSZip = require('./lib/jszip.min.js');
+const Async = require("async");
+
 const download = require('download');
 const fs = require('fire-fs');
 const path = require('path');
@@ -130,16 +133,73 @@ function updateQqPlayCore (opts, cb) {
         }
         hasOpenMessageBox = false;
     }).catch((err) => {
-        console.warn(Editor.T('qqplay-adapter.log.download_err',{err: err}));
+        Editor.warn(Editor.T('qqplay-adapter.log.download_err',{err: err}));
     });
 }
+
+function _addFileToZip (dir, zip, cb) {
+    let files = fs.readdirSync(dir);
+    let index = 0;
+
+    if (index === files.length) {
+        return cb();
+    }
+
+    Async.whilst(
+        function () {
+            return index < files.length;
+        },
+        function (whileCb) {
+            let file = files[index];
+            let pathname = path.join(dir, file);
+            if (fs.lstatSync(pathname).isDirectory()) {
+                let folder = zip.folder(file);
+                _addFileToZip(pathname, folder, ()=>{
+                    index++;
+                    whileCb();
+                });
+            }
+            else {
+                zip.file(file, fs.readFileSync(pathname));
+                index++;
+                whileCb();
+            }
+        },
+        function () {
+            cb();
+        }
+    );
+}
+
+function unpackZip(opts, cb) {
+    if (opts.platform !== 'qqplay' || !opts.qqplay.builderZip) {
+        return cb();
+    }
+    let jsZip = new JSZip();
+    _addFileToZip(opts.dest, jsZip, () => {
+        let basePath = path.join(opts.buildPath, opts.title);
+        jsZip.generateNodeStream(
+            {
+                type: "nodebuffer",
+                compression: "DEFLATE",
+                compressionOptions: {
+                    level: 9
+                }
+            })
+            .pipe(fs.createWriteStream(basePath + '.zip'))
+            .on('finish', cb);
+    });
+}
+
 
 module.exports = {
   load () {
       Editor.Builder.on('build-finished', updateQqPlayCore);
+      Editor.Builder.on('build-finished', unpackZip);
   },
 
   unload () {
       Editor.Builder.removeListener('build-finished', updateQqPlayCore);
+      Editor.Builder.removeListener('build-finished', unpackZip);
   }
 };

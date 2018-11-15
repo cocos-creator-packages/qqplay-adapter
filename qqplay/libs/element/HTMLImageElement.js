@@ -69,11 +69,11 @@ function HTMLImageElement () {
                     self.emit('load');
                 }
                 else {
-                    self.emit('error', "异步加载图片失败 :" + data.path + " code:" + data.errcode + " msg:" + data.errmsg);
+                    self.emit('error', "Loading of images failed:" + data.path + " code:" + data.errcode + " msg:" + data.errmsg);
                 }
             },
             'fail': function (obj) {
-                self.emit('error', "异步加载图片失败 :" + data.path + " code:" + data.errcode + " msg:" + data.errmsg);
+                self.emit('error', "Loading of images failed:" + data.path + " code:" + data.errcode + " msg:" + data.errmsg);
             }
         });
     };
@@ -116,12 +116,12 @@ function HTMLImageElement () {
 
             var filePath = qpAdapter.generateTempFileName(ImageCachePath, val);
             var isFileValid = qpAdapter.isFileAvailable(filePath);
-            // 检查是否存在本地，如果是进行加载
+            // local data
             if (isFileValid) {
                 this._loadedImage(filePath);
             }
             else {
-                // 检查是否进行远程加载
+                // remote data
                 if (/^http/.test(val)) {
                     qpAdapter.downloadFile(val, filePath, function (ret, buffer) {
                         if (ret) {
@@ -132,7 +132,7 @@ function HTMLImageElement () {
                         }
                     }.bind(this));
                 }
-                // 检查是否进行 decodeBase64 加载
+                // decodeBase64 data
                 else if (/^data:image/.test(val)) {
                     // decodeBase64 arraybuffer -> fs io -> BK.image.load
                     var base64str = val.replace(/data:image.+;base64,/, "");

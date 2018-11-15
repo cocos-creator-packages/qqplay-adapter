@@ -23,11 +23,11 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-//-- 进入后台后响应
+//-- Respond after entering the background
 BK.onEnterBackground(function () {
     cc.game.emit(cc.game.EVENT_HIDE);
 });
-//-- 回到前台后响应
+//-- Respond back to the foreground
 BK.onEnterForeground(function () {
     cc.game.emit(cc.game.EVENT_SHOW);
 });

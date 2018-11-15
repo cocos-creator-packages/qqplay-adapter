@@ -68,23 +68,23 @@ function XMLHttpRequest () {
     this.method = null;
     this.url = null;
     this.header = {};
-    this.onabort = null;// todo 不支持
+    this.onabort = null;// todo not support
     this.onerror = null;
     this.onload = null;
     this.onloadstart = null;
-    this.onprogress = null;// todo 不支持
-    this.ontimeout = null;// todo 暂不支持
+    this.onprogress = null;// todo not support
+    this.ontimeout = null;// todo not support
     this.onloadend = null;
     this.onreadystatechange = null;
     this.readyState = 0;
     this.response = null;
     this.responseText = null;
     this.responseType = '';
-    this.responseXML = null;// todo 不支持
+    this.responseXML = null;// todo not support
     this.status = XMLHttpRequest.DONE;
     this.statusText = '';
-    this.upload = {};// todo 不支持
-    this.withCredentials = false;// todo 不支持
+    this.upload = {};// todo not support
+    this.withCredentials = false;// todo not support
     this.timeout = 0;
 }
 
@@ -96,7 +96,7 @@ XMLHttpRequest.DONE = 4;
 
 (function (prop) {
 
-    prop.open = function (method, url/* async, user, password 这几个参数在玩一玩内不支持*/) {
+    prop.open = function (method, url/* async, user, password qqplay not support*/) {
         this.method = method;
         this.url = url;
         this.header = {
