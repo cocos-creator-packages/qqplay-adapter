@@ -23,7 +23,7 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-// 工具类
+// Tools
 BK.Script.loadlib('GameRes://libs/other/sha1.min.js');
 BK.Script.loadlib('GameRes://libs/other/base64js.min.js');
 BK.Script.loadlib('GameRes://libs/other/text-encoder-lite.min.js');

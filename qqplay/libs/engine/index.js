@@ -23,7 +23,7 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-// 用于适配 cocos2d engine 层
+// Used to adapter the cocos2d engine
 BK.Script.loadlib('GameRes://libs/engine/CCGame.js');
 BK.Script.loadlib('GameRes://libs/engine/CCDownloader.js');
 BK.Script.loadlib('GameRes://libs/engine/CCWebSocket.js');

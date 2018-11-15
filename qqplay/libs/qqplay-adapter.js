@@ -85,7 +85,7 @@ window["pageYOffset"] = 0;
 
 var WebGLRenderingContext = function () {};
 
-// 用于在加载引擎后对一些代码适配
+// Used to adapter after loading the engine
 function initAdapter () {
 
     var sps = BK.Director.screenPixelSize;
@@ -382,6 +382,5 @@ var clearInterval = window.clearInterval = function (intervalId) {
 // other adapter
 var performance = { now: function() { return BK.Time.timestamp * 1000; } };
 
-// todo 这个接口不能正常，会导致第三方接口都没法正常工作，暂时赋空
 window.Promise = null;
 

@@ -34,11 +34,12 @@ function HTMLAudioElement (url) {
 
     self._$sn = SN_SEED++;
 
-    self.HAVE_NOTHING = 0;      //-- 没有关于音频/视频是否就绪的信息
-    self.HAVE_METADATA = 1;     //-- 关于音频/视频就绪的元数据
-    self.HAVE_CURRENT_DATA = 2; //-- 关于当前播放位置的数据是可用的，但没有足够的数据来播放下一帧/毫秒
-    self.HAVE_FUTURE_DATA = 3;  //-- 当前及至少下一帧的数据是可用的
-    self.HAVE_ENOUGH_DATA = 4;  //-- 可用数据足以开始播放
+    // api: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/readyState
+    self.HAVE_NOTHING = 0;
+    self.HAVE_METADATA = 1;
+    self.HAVE_CURRENT_DATA = 2;
+    self.HAVE_FUTURE_DATA = 3;
+    self.HAVE_ENOUGH_DATA = 4;
 
     var audioContext = BK.createAudioContext();
     _audioContextMap[self._$sn] = audioContext;

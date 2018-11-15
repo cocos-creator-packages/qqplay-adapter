@@ -23,7 +23,7 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-// WebSocket 适配层
+// WebSocket Adapter
 var WebSocket = window.WebSocket = BK.WebSocket;
 
 WebSocket.CONNECTING = 0;

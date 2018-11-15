@@ -1,4 +1,4 @@
-// 用于适配 element 层
+// Used to adapter the element
 BK.Script.loadlib('GameRes://libs/element/Utils.js');
 BK.Script.loadlib('GameRes://libs/element/HTMLElemenet.js');
 BK.Script.loadlib('GameRes://libs/element/HTMLAudioElement.js');
