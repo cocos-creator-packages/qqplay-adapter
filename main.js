@@ -172,7 +172,7 @@ function _addFileToZip (dir, zip, cb) {
 }
 
 function unpackZip(opts, cb) {
-    if (opts.platform !== 'qqplay' || !opts.qqplay.builderZip) {
+    if (opts.platform !== 'qqplay' || !opts.qqplay.zip) {
         return cb();
     }
     let jsZip = new JSZip();
