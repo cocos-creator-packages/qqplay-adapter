@@ -175,6 +175,9 @@ function unpackZip(opts, cb) {
     if (opts.platform !== 'qqplay' || !opts.qqplay.zip) {
         return cb();
     }
+
+    Editor.log('Start unpack zip');
+
     let jsZip = new JSZip();
     _addFileToZip(opts.dest, jsZip, () => {
         let basePath = path.join(opts.buildPath, opts.title);
@@ -187,7 +190,10 @@ function unpackZip(opts, cb) {
                 }
             })
             .pipe(fs.createWriteStream(basePath + '.zip'))
-            .on('finish', cb);
+            .on('finish', ()=>{
+                Editor.log('Finish unpack zip');
+                cb();
+            });
     });
 }
 
