@@ -9,7 +9,7 @@ cc.loader.downloader.loadSubpackage = function (name, completeCallback) {
         },
         fail: function (failInfo) {
             if (completeCallback) {
-                completeCallback(new Error('Failed to load subpackage +' + name + ' ' + failInfo.msg));
+                completeCallback(new Error('Failed to load subpackage ' + name + ' ' + failInfo.msg));
             }
         }
     })
