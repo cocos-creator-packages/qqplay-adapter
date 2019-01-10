@@ -27,20 +27,4 @@
  *  Adapt to local storage
  *  https://hudong.qq.com/docs/engine/api-new/basics/storage/localStorage.html
  */
-window.localStorage = cc.sys.localStorage = {
-    key: function (index) {
-        return BK.localStorage.key(index);
-    }
-    getItem: function (key) {
-        return BK.localStorage.getItem(key);
-    },
-    setItem: function (key, value) {
-        BK.localStorage.setItem(key, value);
-    },
-    removeItem: function (key) {
-        BK.localStorage.setItem(key);
-    },
-    clear: function () {
-        BK.localStorage.clear();
-    }
-};
+window.localStorage = cc.sys.localStorage = BK.localStorage;
