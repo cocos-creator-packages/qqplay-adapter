@@ -23,72 +23,74 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-if (cc.EditBox) {
-    var KeyboardReturnType = cc.EditBox.KeyboardReturnType;
-    var _p = cc.EditBox._EditBoxImpl.prototype;
+ (function () {
+    if (!(cc && cc.EditBox)) {
+        return;
+    }
+    const EditBox = cc.EditBox;
+    const js = cc.js;
+    
+    function QQEditBoxImpl () {
+        this._delegate = null;
+        this._editing = false;
+    }
+   
+    js.extend(QQEditBoxImpl, EditBox._ImplClass);
+    EditBox._ImplClass = QQEditBoxImpl;
 
-    var component;
-    var impl;
-
+    // bind this pointer when register callback
     function _onBKBtnClick (text) {
-
-        _onBKTextChange(text);
-
-        if (impl._delegate && impl._delegate.editBoxEditingReturn) {
-            impl._delegate.editBoxEditingReturn();
-        }
-        if (impl._delegate && impl._delegate.editBoxEditingDidEnded) {
-            impl._delegate.editBoxEditingDidEnded();
-        }
-
-        impl._editing = false;
-        BK.Editor.hideKeyBoard();
+        this._delegate.editBoxEditingReturn();
+        this.endEditing();
     }
 
+    // bind this pointer when register callback
     function _onBKTextChange (text) {
-        if (text.length > impl._maxLength) {
-            text = text.slice(0, impl._maxLength);
-        }
+        let delegate = this._delegate;
 
-        if (impl._delegate && impl._delegate.editBoxTextChanged) {
-            if (impl._text !== text) {
-                if (text === '') {
-                    _hideTextLabel();
-                }
-                else {
-                    _showTextLabel();
-                }
-                impl._text = text;
-                impl._delegate.editBoxTextChanged(impl._text);
+        if (text.length > delegate.maxLength) {
+            text = text.slice(0, delegate.maxLength);
+            BK.Editor.setText(text);  // limit the maxLength in BK.Editor
+        }
+        if (delegate._string !== text) {
+            delegate.editBoxTextChanged(text);
+        }
+    }
+    
+    Object.assign(QQEditBoxImpl.prototype, {
+        init (delegate) {
+            if (!delegate) {
+                cc.error('EditBox init failed');
+                return;
             }
-        }
-    }
-
-    function _showTextLabel () {
-        if (component) {
-            component._textLabel.node.active = true;
-            component._placeholderLabel.node.active = false;
-        }
-    }
-
-    function _hideTextLabel () {
-        if (component) {
-            component._textLabel.node.active = false;
-            component._placeholderLabel.node.active = true;
-        }
-    }
-
-    _p._beginEditing = function () {
-        if (impl !== this) {
-            impl = this;
-            component = this._node.getComponent(cc.EditBox);
-        }
-        BK.Editor.showKeyBoard(_onBKBtnClick.bind(impl), _onBKTextChange.bind(impl));
-        BK.Editor.setText(impl._text);
-        if (impl._delegate && impl._delegate.editBoxEditingDidBegan) {
-            impl._delegate.editBoxEditingDidBegan();
-        }
-        _showTextLabel();
-        impl._editing = true;
-    };
-}
+            this._delegate = delegate;
+        },
+    
+        setFocus (value) {
+            if (value) {
+                this.beginEditing();
+            }
+            else {
+                this.endEditing();
+            }
+        },
+    
+        isFocused () {
+            return this._editing;
+        },
+    
+        beginEditing () {
+            let delegate = this._delegate;
+            this._editing = true;
+            BK.Editor.showKeyBoard(_onBKBtnClick.bind(this), _onBKTextChange.bind(this));
+            BK.Editor.setText(delegate._string);
+            delegate.editBoxEditingDidBegan();
+        },
+        
+        endEditing () {
+            this._editing = false;
+            BK.Editor.hideKeyBoard();
+            this._delegate.editBoxEditingDidEnded();    
+        },
+    });
+ })();
