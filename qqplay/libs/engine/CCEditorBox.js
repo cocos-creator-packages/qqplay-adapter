@@ -27,8 +27,8 @@
     if (!(cc && cc.EditBox)) {
         return;
     }
-    const EditBox = cc.EditBox;
-    const js = cc.js;
+    var EditBox = cc.EditBox;
+    var js = cc.js;
     
     function QQEditBoxImpl () {
         this._delegate = null;
@@ -46,7 +46,7 @@
 
     // bind this pointer when register callback
     function _onBKTextChange (text) {
-        let delegate = this._delegate;
+        var delegate = this._delegate;
 
         if (text.length > delegate.maxLength) {
             text = text.slice(0, delegate.maxLength);
@@ -80,7 +80,7 @@
         },
     
         beginEditing () {
-            let delegate = this._delegate;
+            var delegate = this._delegate;
             this._editing = true;
             BK.Editor.showKeyBoard(_onBKBtnClick.bind(this), _onBKTextChange.bind(this));
             BK.Editor.setText(delegate._string);
