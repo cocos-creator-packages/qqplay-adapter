@@ -58,7 +58,7 @@
     }
     
     Object.assign(QQEditBoxImpl.prototype, {
-        init (delegate) {
+        init: function (delegate) {
             if (!delegate) {
                 cc.error('EditBox init failed');
                 return;
@@ -66,7 +66,7 @@
             this._delegate = delegate;
         },
     
-        setFocus (value) {
+        setFocus: function (value) {
             if (value) {
                 this.beginEditing();
             }
@@ -75,11 +75,11 @@
             }
         },
     
-        isFocused () {
+        isFocused: function () {
             return this._editing;
         },
     
-        beginEditing () {
+        beginEditing: function () {
             var delegate = this._delegate;
             this._editing = true;
             BK.Editor.showKeyBoard(_onBKBtnClick.bind(this), _onBKTextChange.bind(this));
@@ -87,7 +87,7 @@
             delegate.editBoxEditingDidBegan();
         },
         
-        endEditing () {
+        endEditing: function () {
             this._editing = false;
             BK.Editor.hideKeyBoard();
             this._delegate.editBoxEditingDidEnded();    
