@@ -22,6 +22,8 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
  ****************************************************************************/
+var renderer = cc.renderer;
+var dynamicAtlasManager = cc.dynamicAtlasManager;
 
 //-- Respond after entering the background
 BK.onEnterBackground(function () {
@@ -68,4 +70,45 @@ cc.game._runMainLoop = function () {
 
     self._intervalId = window.requestAnimFrame(callback);
     self._paused = false;
+};
+
+cc.game._initRenderer = function () {
+    // Avoid setup to be called twice.
+    if (this._rendererInitialized) return;
+        
+    this.container = document.createElement("DIV");
+    this.frame = document.documentElement;
+    let localCanvas = this.canvas = canvas;
+
+    this._determineRenderType();
+    // WebGL context created successfully
+    if (this.renderType === this.RENDER_TYPE_WEBGL) {
+        var opts = {
+            'stencil': true,
+            // MSAA is causing serious performance dropdown on some browsers.
+            'antialias': cc.macro.ENABLE_WEBGL_ANTIALIAS,
+            'alpha': cc.macro.ENABLE_TRANSPARENT_CANVAS,
+            'preserveDrawingBuffer': true,
+        };
+
+        renderer.initWebGL(localCanvas, opts);
+        this._renderContext = renderer.device._gl;
+        
+        // Enable dynamic atlas manager by default
+        if (!cc.macro.CLEANUP_IMAGE_CACHE && dynamicAtlasManager) {
+            dynamicAtlasManager.enabled = true;
+        }
+    }
+    if (!this._renderContext) {
+        this.renderType = this.RENDER_TYPE_CANVAS;
+        // Could be ignored by module settings
+        renderer.initCanvas(localCanvas);
+        this._renderContext = renderer.device._ctx;
+    }
+
+    this.canvas.oncontextmenu = function () {
+        if (!cc._isContextMenuEnable) return false;
+    };
+
+    this._rendererInitialized = true;
 };

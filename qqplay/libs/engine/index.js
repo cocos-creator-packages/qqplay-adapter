@@ -25,10 +25,12 @@
 
 // Used to adapter the cocos2d engine
 BK.Script.loadlib('GameRes://libs/engine/CCGame.js');
+BK.Script.loadlib('GameRes://libs/engine/CCInputManager.js');
 BK.Script.loadlib('GameRes://libs/engine/CCDownloader.js');
 BK.Script.loadlib('GameRes://libs/engine/CCWebSocket.js');
-// ParticleSystem
 BK.Script.loadlib('GameRes://libs/engine/PNGReader.js');
+BK.Script.loadlib('GameRes://libs/engine/CCAudio.js');
 BK.Script.loadlib('GameRes://libs/engine/CCAudioEngine.js');
 BK.Script.loadlib('GameRes://libs/engine/CCEditorBox.js');
 BK.Script.loadlib('GameRes://libs/engine/CCLocalStorage.js');
+BK.Script.loadlib('GameRes://libs/engine/CCTexture2D.js');
